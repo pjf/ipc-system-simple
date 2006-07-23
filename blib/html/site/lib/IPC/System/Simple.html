@@ -1,0 +1,191 @@
+<?xml version="1.0" ?>
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+<head>
+<!-- saved from url=(0017)http://localhost/ -->
+<script language="JavaScript" src="../../../../displayToc.js"></script>
+<script language="JavaScript" src="../../../../tocParas.js"></script>
+<script language="JavaScript" src="../../../../tocTab.js"></script>
+<link rel="stylesheet" type="text/css" href="../../../../scineplex.css">
+<title>IPC::System::Simple - Call system commands with a minimum of fuss</title>
+<link rel="stylesheet" href="../../../../Active.css" type="text/css" />
+<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+<link rev="made" href="mailto:" />
+</head>
+
+<body>
+
+<script>writelinks('__top__',4);</script>
+<h1><a>IPC::System::Simple - Call system commands with a minimum of fuss</a></h1>
+<p><a name="__index__"></a></p>
+
+<!-- INDEX BEGIN -->
+
+<ul>
+
+	<li><a href="#synopsis">SYNOPSIS</a></li>
+	<li><a href="#description">DESCRIPTION</a></li>
+	<li><a href="#diagnostics">DIAGNOSTICS</a></li>
+	<li><a href="#bugs">BUGS</a></li>
+	<li><a href="#see_also">SEE ALSO</a></li>
+	<li><a href="#author">AUTHOR</a></li>
+	<li><a href="#copyright_and_license">COPYRIGHT AND LICENSE</a></li>
+</ul>
+<!-- INDEX END -->
+
+<hr />
+<p>
+</p>
+<h1><a name="synopsis">SYNOPSIS</a></h1>
+<pre>
+  <span class="keyword">use</span> <span class="variable">IPC::System::Simple</span> <span class="string">qw(run)</span><span class="operator">;</span>
+</pre>
+<pre>
+  <span class="variable">run</span><span class="operator">(</span><span class="string">"foo"</span><span class="operator">);</span>
+</pre>
+<pre>
+  <span class="variable">run</span><span class="operator">(</span><span class="string">"foo"</span><span class="operator">,</span><span class="variable">@args</span><span class="operator">);</span>
+</pre>
+<pre>
+  <span class="keyword">my</span> <span class="variable">$exit_value</span> <span class="operator">=</span> <span class="variable">run</span><span class="operator">(</span><span class="operator">[</span><span class="number">0</span><span class="operator">..</span><span class="number">5</span><span class="operator">]</span><span class="operator">,</span> <span class="string">"foo"</span><span class="operator">,</span> <span class="variable">@args</span><span class="operator">);</span>
+</pre>
+<p>
+</p>
+<hr />
+<h1><a name="description">DESCRIPTION</a></h1>
+<p>Calling Perl's in-built <a href="../../../../lib/Pod/perlfunc.html#item_system"><code>system()</code></a> function is easy, but checking
+the results can be hard.  <code>IPC::System::Simple</code> aims to make
+life easy for the <em>common cases</em> of calling system.</p>
+<p><code>IPC::System::Simple</code> provides a single subroutine, called
+<code>run</code>, that executes a command using the same semantics is
+Perl's built-in <a href="../../../../lib/Pod/perlfunc.html#item_system"><code>system</code></a>:</p>
+<pre>
+        <span class="keyword">use</span> <span class="variable">IPC::System::Simple</span> <span class="string">qw(run)</span><span class="operator">;</span>
+</pre>
+<pre>
+        <span class="variable">run</span><span class="operator">(</span><span class="string">"cat *.txt"</span><span class="operator">);</span>               <span class="comment"># Execute command via the shell</span>
+        <span class="variable">run</span><span class="operator">(</span><span class="string">"cat"</span><span class="operator">,</span><span class="string">"/etc/motd"</span><span class="operator">);</span>         <span class="comment"># Execute command without shell</span>
+</pre>
+<p>In the case where the command returns an unexpected status,
+<code>run</code> will throw an exception, which is not caught will terminate
+your program with an error.</p>
+<p>Capturing an the exception is easy:</p>
+<pre>
+        <span class="keyword">eval</span> <span class="operator">{</span>
+                <span class="variable">run</span><span class="operator">(</span><span class="string">"cat *.txt"</span><span class="operator">);</span>
+        <span class="operator">};</span>
+</pre>
+<pre>
+        <span class="keyword">if</span> <span class="operator">(</span><span class="variable">$@</span><span class="operator">)</span> <span class="operator">{</span>
+                <span class="keyword">print</span> <span class="string">"Something went wrong - $@\n"</span><span class="operator">;</span>
+        <span class="operator">}</span>
+</pre>
+<p>See the diagnostics section below for more details.</p>
+<p><code>IPC::System::Simple</code> considers the following to be unexpected,
+and worthy of exception:</p>
+<ul>
+<li>
+<p>Failing to start entirely (eg, command not found, permission denied).</p>
+</li>
+<li>
+<p>Returning an exit value other than zero (but see below).</p>
+</li>
+<li>
+<p>Being killed by a signal.</p>
+</li>
+</ul>
+<p>You may specify a range of values which are considered acceptable
+return values by passing an <em>array reference</em> as the first argument:</p>
+<pre>
+        <span class="variable">run</span><span class="operator">(</span> <span class="operator">[</span><span class="number">0</span><span class="operator">..</span><span class="number">5</span><span class="operator">]</span><span class="operator">,</span> <span class="string">"cat *.txt"</span><span class="operator">);</span>      <span class="comment"># Exit values 0-5 are OK</span>
+</pre>
+<pre>
+        <span class="variable">run</span><span class="operator">(</span> <span class="operator">[</span><span class="number">0</span><span class="operator">..</span><span class="number">255</span><span class="operator">]</span><span class="operator">,</span> <span class="string">"cat *.txt"</span><span class="operator">);</span>    <span class="comment"># Any exit value is OK</span>
+</pre>
+<p>The <code>run</code> subroutine returns the exit value of the process:</p>
+<pre>
+        <span class="keyword">my</span> <span class="variable">$exit_value</span> <span class="operator">=</span> <span class="variable">run</span><span class="operator">(</span> <span class="operator">[</span><span class="number">0</span><span class="operator">..</span><span class="number">5</span><span class="operator">]</span><span class="operator">,</span> <span class="string">"cat *.txt"</span><span class="operator">);</span>
+</pre>
+<pre>
+        <span class="keyword">print</span> <span class="string">"Program exited with value $exit_value\n"</span><span class="operator">;</span>
+</pre>
+<p>
+</p>
+<hr />
+<h1><a name="diagnostics">DIAGNOSTICS</a></h1>
+<dl>
+<dt><strong><a name="item_ipc_3a_3asystem_3a_3asimple_3a_3arun_called_with_n">IPC::System::Simple::run called with no arguments</a></strong>
+
+<dd>
+<p>You attempted to call <code>run</code> but did not provide any arguments at all.</p>
+</dd>
+</li>
+<dt><strong>IPC::System::Simple::run called with no command</strong>
+
+<dd>
+<p>You called <code>run</code> with a list of acceptable exit values, but no
+actual command.</p>
+</dd>
+</li>
+<dt><strong><a name="item__22_25s_22_failed_to_start_3a__22_25s_22">``%s'' failed to start: ``%s''</a></strong>
+
+<dd>
+<p>The command specified did not even start.  It may not exist, or
+you may not have permission to use it.  The reason it could not
+start (as determined from <a href="../../../../lib/Pod/perlvar.html#item___"><code>$!</code></a>) will be provided.</p>
+</dd>
+</li>
+<dt><strong><a name="item__22_25s_22_unexpectedly_returned_exit_value__25d_2">``%s'' unexpectedly returned exit value %d``</a></strong>
+
+<dd>
+<p>The command ran successful, but returned an exit value we did
+not expect.  The value returned is reported.</p>
+</dd>
+</li>
+<dt><strong><a name="item__22_25s_22_died_to_signal__22_25s_22__28_25d_29">``%s'' died to signal ``%s'' (%d)</a></strong>
+
+<dd>
+<p>The command was killed by a signal.  The name of the signal
+will be reported, or <code>UNKNOWN</code> if it cannot be determined.  The
+signal number is always reported.</p>
+</dd>
+</li>
+<dt><strong><a name="item_internal_error_in_ipc_3a_3asystem_3a_3asimple__2d_">Internal error in IPC::System::Simple - ``%s'' ran without exit value or signal``</a></strong>
+
+<dd>
+<p>You've found a bug in <code>IPC::System::Simple</code>.  It knows your command
+ran successful, but doesn't know how or why it stopped.  Please
+report this error using the submission mechanism described in
+BUGS below.</p>
+</dd>
+</li>
+</dl>
+<p>
+</p>
+<hr />
+<h1><a name="bugs">BUGS</a></h1>
+<p>Reporting of core-dumps is not yet implemented.</p>
+<p>WIFSTOPPED status is not checked.</p>
+<p>Please report bugs to <a href="http://rt.cpan.org/Public/Dist/Display.html?Name=IPC-System-Simple">http://rt.cpan.org/Public/Dist/Display.html</a> .</p>
+<p>
+</p>
+<hr />
+<h1><a name="see_also">SEE ALSO</a></h1>
+<p><a href="../../../../lib/POSIX.html">the POSIX manpage</a> <a href="../../../../IPC/Run/Simple.html">the IPC::Run::Simple manpage</a></p>
+<p>
+</p>
+<hr />
+<h1><a name="author">AUTHOR</a></h1>
+<p>Paul Fenwick &lt;<a href="mailto:pjf@cpan.org">pjf@cpan.org</a>&gt;</p>
+<p>
+</p>
+<hr />
+<h1><a name="copyright_and_license">COPYRIGHT AND LICENSE</a></h1>
+<p>Copyright (C) 2006 by Paul Fenwick</p>
+<p>This library is free software; you can redistribute it and/or modify
+it under the same terms as Perl itself, either Perl version 5.8.7 or,
+at your option, any later version of Perl 5 you may have available.</p>
+
+</body>
+
+</html>

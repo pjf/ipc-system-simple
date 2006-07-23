@@ -1,0 +1,10 @@
+Changes
+Makefile.PL
+MANIFEST
+README
+lib/IPC/System/Simple.pm
+t/01_load.t
+t/02_exit.t
+t/03_signal.t
+t/exiter.pl
+t/signaler.pl
