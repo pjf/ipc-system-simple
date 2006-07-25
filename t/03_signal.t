@@ -19,4 +19,4 @@ eval {
 	run([1],"signaler.pl",2);		# SIGINT on most systems.
 };
 
-ok($@);
+like($@, qr/died to signal/);

@@ -12,4 +12,4 @@ eval {
 	run("exiter.pl",1);
 };
 
-ok($@);
+like($@, qr/unexpectedly returned exit value 1/ );
