@@ -11,7 +11,7 @@ use POSIX qw(WIFEXITED WEXITSTATUS WIFSIGNALED WTERMSIG);
 require Exporter;
 our @ISA = qw(Exporter);
 our @EXPORT_OK = qw( run );
-our $VERSION = '0.02';
+our $VERSION = '0.03';
 
 my @Signal_from_number = split(' ', $Config{sig_name});
 
@@ -198,9 +198,7 @@ Reporting of core-dumps is not yet implemented.
 
 WIFSTOPPED status is not checked.
 
-This modules relies upon a number of POSIX macros
-(WIFEXITED WEXITSTATUS WIFSIGNALED WTERMSIG) which are normally
-only found on Unix-flavoured systems.  This will be fixed ASAP.
+Signals are not supported under Win32 systems.
 
 Please report bugs to L<http://rt.cpan.org/Public/Dist/Display.html?Name=IPC-System-Simple> .
 

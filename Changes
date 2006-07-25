@@ -4,3 +4,10 @@ Revision history for Perl extension IPC::System::Simple.
 	- original version; created by h2xs 1.23 with options
 		-b 5.6.0 -X IPC::System::Simple
 
+0.02  Tue Jul 25 12:05:50 AUSEST 2006
+	- Updated to emulate WIFEXITED on systems that don't provide them
+	- Signal tests skipped under Win32
+	- Better testing
+
+0.03	Tue Jul 25 12:07:09 AUSEST 2006
+	- Documentation improvements

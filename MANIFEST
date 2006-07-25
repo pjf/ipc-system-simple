@@ -8,3 +8,4 @@ t/02_exit.t
 t/03_signal.t
 t/exiter.pl
 t/signaler.pl
+META.yml                                 Module meta-data (added by MakeMaker)
