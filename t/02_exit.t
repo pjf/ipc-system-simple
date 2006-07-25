@@ -1,14 +1,15 @@
 #!/usr/bin/perl -w
 use strict;
-use Test::More 'no_plan';
+use Test::More tests => 3;
 
 use_ok("IPC::System::Simple","run");
+chdir("t");
 
-run("t/exiter.pl",0);
+run("exiter.pl",0);
 ok(1);
 
 eval {
-	run("t/exiter.pl",1);
+	run("exiter.pl",1);
 };
 
 ok($@);

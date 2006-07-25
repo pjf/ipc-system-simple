@@ -4,18 +4,30 @@ use 5.006;
 use strict;
 use warnings;
 use Carp;
-use POSIX qw(WIFEXITED WEXITSTATUS WIFSIGNALED WTERMSIG);
 use List::Util qw(first);
 use Config;
+use POSIX qw(WIFEXITED WEXITSTATUS WIFSIGNALED WTERMSIG);
 
 require Exporter;
 our @ISA = qw(Exporter);
-
 our @EXPORT_OK = qw( run );
-
-our $VERSION = '0.01';
+our $VERSION = '0.02';
 
 my @Signal_from_number = split(' ', $Config{sig_name});
+
+# Not all systems implment the WIFEXITED calls, but POSIX
+# will always export them (even if they're just stubs that
+# die with an error).  Test for the presence of a working
+# WIFEXITED and friends, or define our own.
+
+eval { WIFEXITED(0); };
+
+if ($@ =~ /not defined POSIX macro/) {
+	*WIFEXITED   = sub { $_[0] != 1 and not $_[0] & 127 };
+	*WEXITSTATUS = sub { $_[0] >> 8  };
+	*WIFSIGNALED = sub { $_[0] & 127 };
+	*WTERMSIG    = sub { $_[0] & 127 };
+}
 
 # TODO - This doesn't look for core-dumps yet.
 # TODO - WTF is a WIFSTOPPED and how can it hurt us?
