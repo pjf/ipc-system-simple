@@ -11,7 +11,7 @@ use POSIX qw(WIFEXITED WEXITSTATUS WIFSIGNALED WTERMSIG);
 require Exporter;
 our @ISA = qw(Exporter);
 our @EXPORT_OK = qw( run );
-our $VERSION = '0.03';
+our $VERSION = '0.04';
 
 my @Signal_from_number = split(' ', $Config{sig_name});
 

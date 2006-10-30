@@ -9,5 +9,13 @@ Revision history for Perl extension IPC::System::Simple.
 	- Signal tests skipped under Win32
 	- Better testing
 
-0.03	Tue Jul 25 12:07:09 AUSEST 2006
+0.03  Tue Jul 25 12:07:09 AUSEST 2006
 	- Documentation improvements
+
+0.04  Mon Oct 30 15:14:53 AUSEST 2006
+	- Fixed path issue with tests that would cause them
+	  to fail on some systems where "." was not in the
+	  $ENV{PATH}
+
+	- Tests now always use the system-configured perl for
+	  invoking commands.
