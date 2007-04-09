@@ -59,7 +59,7 @@ sub run {
 		my $exit_value = WEXITSTATUS( $? );
 
 		if (not defined first { $_ == $exit_value } @$valid_returns) {
-			croak qq{"$command" unexpectedly returned exit value $exit_value"};
+			croak qq{"$command" unexpectedly returned exit value $exit_value};
 		}
 
 		return $exit_value;
@@ -72,7 +72,7 @@ sub run {
 
 	} 
 
-	croak qq{Internal error in IPC::System::Simple - "$command" ran without exit value or signal"};
+	croak qq{Internal error in IPC::System::Simple - "$command" ran without exit value or signal};
 
 }
 
@@ -174,7 +174,7 @@ The command specified did not even start.  It may not exist, or
 you may not have permission to use it.  The reason it could not
 start (as determined from C<$!>) will be provided.
 
-=item "%s" unexpectedly returned exit value %d"
+=item "%s" unexpectedly returned exit value %d
 
 The command ran successful, but returned an exit value we did
 not expect.  The value returned is reported.
@@ -185,7 +185,7 @@ The command was killed by a signal.  The name of the signal
 will be reported, or C<UNKNOWN> if it cannot be determined.  The
 signal number is always reported.
 
-=item Internal error in IPC::System::Simple - "%s" ran without exit value or signal"
+=item Internal error in IPC::System::Simple - "%s" ran without exit value or signal
 
 You've found a bug in C<IPC::System::Simple>.  It knows your command
 ran successful, but doesn't know how or why it stopped.  Please

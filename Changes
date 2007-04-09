@@ -19,3 +19,8 @@ Revision history for Perl extension IPC::System::Simple.
 
 	- Tests now always use the system-configured perl for
 	  invoking commands.
+
+0.05  Mon Apr  9 16:22:22 AUSEST 2007
+	- Removed spurious double-quotes in error messages reporting
+	  unexpected exit values and an internal error message.  Thanks
+	  to Jon Swartz for spotting these.
