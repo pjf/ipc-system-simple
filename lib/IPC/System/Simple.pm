@@ -6,12 +6,16 @@ use warnings;
 use Carp;
 use List::Util qw(first);
 use Config;
+use constant WINDOWS => ($^O eq'MSWin32');
+use if WINDOWS, 'Win32::Process', qw(INFINITE NORMAL_PRIORITY_CLASS);
+use if WINDOWS, 'Win32';
 use POSIX qw(WIFEXITED WEXITSTATUS WIFSIGNALED WTERMSIG);
 
 require Exporter;
 our @ISA = qw(Exporter);
-our @EXPORT_OK = qw( run );
-our $VERSION = '0.05';
+our @EXPORT_OK = qw( run capture $EXITVAL );
+our $VERSION = '0.06';
+our $EXITVAL = -1;
 
 my @Signal_from_number = split(' ', $Config{sig_name});
 
@@ -21,6 +25,9 @@ my @Signal_from_number = split(' ', $Config{sig_name});
 # WIFEXITED and friends, or define our own.
 
 eval { WIFEXITED(0); };
+
+# XXX - Why does WIFEXITED check to see if our value is != 1?
+# XXX - Shouldn't it be checking to ensure it's not -1?
 
 if ($@ =~ /not defined POSIX macro/) {
 	*WIFEXITED   = sub { $_[0] != 1 and not $_[0] & 127 };
@@ -33,39 +40,135 @@ if ($@ =~ /not defined POSIX macro/) {
 # TODO - WTF is a WIFSTOPPED and how can it hurt us?
 
 sub run {
+	my ($valid_returns, $command, @args) = _process_args(@_);
 
-	my $valid_returns = [ 0 ];
-
-	if (not @_) {
-		croak "IPC::System::Simple::run called with no arguments";
+	# With the wonders of constant folding the following code
+	# is completely optimised away under non-windows systems.
+	if (WINDOWS) {
+		our $EXITVAL = -1;
+		my $pid;
+		my $success = Win32::Process::Create(
+			$pid,$command,"$command @args",1,NORMAL_PRIORITY_CLASS,"."
+		);
+		if (not $success) {
+			croak sprintf(
+				q{"%s" failed to start: "%s"},
+				$command, $^E
+			);
+		}
+		$pid->Wait(INFINITE);	# Wait for process exit.
+		$pid->GetExitCode($EXITVAL);
+		return _check_exit($command,$EXITVAL,$valid_returns);
 	}
 
-	if (ref $_[0] eq "ARRAY") {
-		$valid_returns = shift(@_);
+	# On non-Win32 systems, we have an easier time.
+
+	# We're throwing our own exception on command not found.
+	# We don't need a warning from Perl.
+	no warnings 'exec';
+	system($command,@args);
+
+	return _process_child_error($?,$command,$valid_returns);
+}
+
+# Capture output of command.  Identical semantics to qx()
+
+# TODO - List pipe not implemented on win32
+
+# TODO - Stash the command output somewhere, so it can be retrieved
+#        on exception.
+
+# TODO - One arg should allow shell.  Multi args should not.
+
+# XXX - A lot of this should be replacable with a call to readpipe()
+
+sub capture {
+	my ($valid_returns, $command, @args) = _process_args(@_);
+
+	my $command_fh;
+
+	# Under windows we have two problems.  Firstly, as of
+	# 5.8.8 no Perl implements multi-arg piped open.  Secondly,
+	# a failed open will end up invoking the shell and it make
+	# it impossible to tell if it's actually failed.
+
+	if (WINDOWS) {
+		if (@args == 1 and _win32_has_shell_metachars($args[0])) {
+			no warnings 'exec';
+			open(my $command_fh, "-|", $command, @args)
+				or croak qq{"$command" failed to start "$!"};
+		} else {
+
+			# XXX This doesn't work!
+
+			pipe($command_fh, my $child_fh);
+			my $r = fork();
+			if (not defined $r) {
+				croak qq{"$command" failed to start "Fork failed: $!"};
+			} elsif ($r) {
+				# Parent
+				warn "in parent\n";
+				close($child_fh);
+				warn "Child fh closed\n";
+			} else {
+				# Child
+				warn "In child\n";
+				close($command_fh);
+				warn "command fh closed\n";
+				# Redirect STDOUT manually.
+				open(STDOUT,'>&',$child_fh) or die"Cannot dup\n";
+				warn "STDOUT redired\n";
+				# Finally exec!
+				# Crap!  This doesn't let us know
+				# if the command failed either.
+				exec($command,@args);
+				die "Exec failed!\n";
+			}
+		}
+	} else {
+		# We're throwing our own exception on command not found.
+		# We don't need a warning from Perl.
+		no warnings 'exec';
+
+		open($command_fh, "-|", $command, @args)
+			or croak qq{"$command" failed to start "$!"};
 	}
 
-	if (not @_) {
-		croak "IPC::System::Simple::run called with no command";
+	if (wantarray()) {
+		my @return = <$command_fh>;
+		close($command_fh);
+		_process_child_error($?,$command,$valid_returns);
+		return @return;
 	}
 
-	my $command = shift(@_);
+	local $/;
+	my $return = <$command_fh>;
+	close($command_fh);
 
-	system($command,@_);
+	_process_child_error($?,$command, $valid_returns);
+	return $return;
+}
 
-	if ($? == -1) {
+# This subroutine performs the difficult task of interpreting
+# $?.  It's not intended to be called directly, as it will
+# croak on errors, and its implementation and interface may
+# change in the future.
+
+sub _process_child_error {
+	my ($child_error, $command, $valid_returns) = @_;
+	
+	$EXITVAL = -1;
+
+	if ($child_error == -1) {
 		croak qq{"$command" failed to start: "$!"};
 
-	} elsif ( WIFEXITED( $? ) ) {
-		my $exit_value = WEXITSTATUS( $? );
+	} elsif ( WIFEXITED( $child_error ) ) {
+		$EXITVAL = WEXITSTATUS( $child_error );
 
-		if (not defined first { $_ == $exit_value } @$valid_returns) {
-			croak qq{"$command" unexpectedly returned exit value $exit_value};
-		}
+		return _check_exit($command,$EXITVAL,$valid_returns);
 
-		return $exit_value;
-
-	} elsif ( WIFSIGNALED( $? ) ) {
-		my $signal_no   = WTERMSIG( $? );
+	} elsif ( WIFSIGNALED( $child_error ) ) {
+		my $signal_no   = WTERMSIG( $child_error );
 		my $signal_name = $Signal_from_number[$signal_no] || "UNKNOWN";
 
 		croak qq{"$command" died to signal "$signal_name" ($signal_no)};
@@ -76,6 +179,68 @@ sub run {
 
 }
 
+sub _check_exit {
+	my ($command,$exitval, $valid_returns) = @_;
+	if (not defined first { $_ == $exitval } @$valid_returns) {
+		croak qq{"$command" unexpectedly returned exit value $EXITVAL};
+	}	
+	return $exitval;
+}
+
+
+# This subroutine simply determines a list of valid returns, the command
+# name, and any arguments that we need to pass to it.
+
+sub _process_args {
+	my $valid_returns = [ 0 ];
+	my $caller = (caller(1))[3];
+
+	if (not @_) {
+		croak "IPC::System::Simple::$caller called with no arguments";
+	}
+
+	if (ref $_[0] eq "ARRAY") {
+		$valid_returns = shift(@_);
+	}
+
+	if (not @_) {
+		croak "IPC::System::Simple::$caller called with no command";
+	}
+
+	my $command = shift(@_);
+
+	return ($valid_returns,$command,@_);
+
+}
+
+# This is the same algorithm as has_shell_metachars() in the win32.c
+# file in the Perl core itself.
+
+sub _win32_has_shell_metachars {
+	my $inquote;
+	my $quote;
+	for (my $i = 0; $i < length($_[0]); $i++) {
+		my $c = substr($_[0],$i,1);
+		if ($c eq "%")  { 
+			return 1;
+		} elsif ($c eq q{'} or $c eq q{"}) {
+			if ($inquote and $c eq $quote) {
+				undef $quote;
+				$inquote = 0;
+			} else {
+				$quote = $c;
+				$inquote = 1;
+			}
+		} elsif ($c eq '<' or $c eq '>' or $c eq '|') {
+			if (not $inquote) {
+				return 1;
+			}
+		}
+	}
+	return 0;
+}
+
+
 1;
 __END__
 =head1 NAME
@@ -84,13 +249,17 @@ IPC::System::Simple - Call system() commands with a minimum of fuss
 
 =head1 SYNOPSIS
 
-  use IPC::System::Simple qw(run);
+  use IPC::System::Simple qw(run capture $EXITVAL);
 
-  run("foo");
+  run("some_command");        # Run a command and check exit status
 
-  run("foo",@args);
+  run("some_command",@args);  # Run a command, avoiding the shell
 
-  my $exit_value = run([0..5], "foo", @args);
+  my $exit_value = run([0..5], "some_command", @args);
+
+  my $program_output = capture("some_command");
+
+  print "some_command exited with status $EXITVAL\n";
 
 =head1 DESCRIPTION
 
@@ -155,6 +324,38 @@ The C<run> subroutine returns the exit value of the process:
 
 	print "Program exited with value $exit_value\n";
 
+=head2 capture
+
+	my $output       = capture("cat *.txt");
+	my @output_lines = capture("cat *.txt");
+
+The C<capture> subroutine has identical semantics to Perl's built-in
+backticks operator.  In scalar context, C<capture> will return
+the output of the command specified.  In list context,
+C<capture> will return a list of records, separated by
+the contents of C<$/>, just like backticks.  In a void
+context C<capture> will execute the command requested, but supress
+its output.
+
+Just like C<run>, the C<capture> subroutine will throw an exception
+if the command fails to start, dies from a signal, or exits with
+a non-zero exit status.  Just like run, a list of acceptable return
+values can be passed as an array-reference in the first argument:
+
+	my $output = capture( [0..5], "cat *.txt");
+
+C<capture> can also be called with multiple arguments, in which
+case the shell is bypassed, identical to the multi-argument
+form of C<system>.  Multi-argument C<capture> is not implemented
+on Windows system.
+
+=head2 $EXITVAL
+
+After a call to C<run> or C<capture> the exit value of the command
+is always available in C<$IPC::System::Simple::EXITVAL>.  This will
+be set to C<-1> if the command did not exit normally (eg,
+being terminated by a signal) or did not start.
+
 =head1 DIAGNOSTICS
 
 =over 4
@@ -192,6 +393,8 @@ ran successful, but doesn't know how or why it stopped.  Please
 report this error using the submission mechanism described in
 BUGS below.
 
+=back
+
 =head1 BUGS
 
 Reporting of core-dumps is not yet implemented.
@@ -204,7 +407,7 @@ Please report bugs to L<http://rt.cpan.org/Public/Dist/Display.html?Name=IPC-Sys
 
 =head1 SEE ALSO
 
-L<POSIX> L<IPC::Run::Simple>
+L<POSIX> L<IPC::Run::Simple> L<perlipc> L<perlport> L<IPC::Run>
 
 =head1 AUTHOR
 
@@ -212,7 +415,7 @@ Paul Fenwick E<lt>pjf@cpan.orgE<gt>
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (C) 2006 by Paul Fenwick
+Copyright (C) 2006-2007 by Paul Fenwick
 
 This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself, either Perl version 5.8.7 or,

@@ -24,3 +24,7 @@ Revision history for Perl extension IPC::System::Simple.
 	- Removed spurious double-quotes in error messages reporting
 	  unexpected exit values and an internal error message.  Thanks
 	  to Jon Swartz for spotting these.
+
+0.06
+	- Warnings are no longer emitted on failed calls to system().
+	- Multiple argument run() no longer uses the shell under Win32.

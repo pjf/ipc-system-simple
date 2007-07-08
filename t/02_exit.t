@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 use strict;
-use Test::More tests => 3;
+use Test::More tests => 13;
 use Config;
 
 # We want to invoke our sub-commands using Perl.
@@ -18,8 +18,11 @@ chdir("t");
 run($perl_path,"exiter.pl",0);
 ok(1);
 
-eval {
-	run($perl_path,"exiter.pl",1);
-};
+foreach (1..5,250..255) {
 
-like($@, qr/unexpectedly returned exit value 1/ );
+	eval {
+		run($perl_path,"exiter.pl",$_);
+	};
+
+	like($@, qr/unexpectedly returned exit value $_/ );
+}
