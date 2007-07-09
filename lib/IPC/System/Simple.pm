@@ -26,11 +26,8 @@ my @Signal_from_number = split(' ', $Config{sig_name});
 
 eval { WIFEXITED(0); };
 
-# XXX - Why does WIFEXITED check to see if our value is != 1?
-# XXX - Shouldn't it be checking to ensure it's not -1?
-
 if ($@ =~ /not defined POSIX macro/) {
-	*WIFEXITED   = sub { $_[0] != 1 and not $_[0] & 127 };
+	*WIFEXITED   = sub { not $_[0] & 0xff };
 	*WEXITSTATUS = sub { $_[0] >> 8  };
 	*WIFSIGNALED = sub { $_[0] & 127 };
 	*WTERMSIG    = sub { $_[0] & 127 };
@@ -182,7 +179,7 @@ sub _process_child_error {
 sub _check_exit {
 	my ($command,$exitval, $valid_returns) = @_;
 	if (not defined first { $_ == $exitval } @$valid_returns) {
-		croak qq{"$command" unexpectedly returned exit value $EXITVAL};
+		croak qq{"$command" unexpectedly returned exit value $exitval};
 	}	
 	return $exitval;
 }
