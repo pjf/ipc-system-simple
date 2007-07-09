@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 use strict;
-use Test::More;
+use Test::More skip_all => "Unimplemented";
 use Config;
 
 if ($^O eq "MSWin32") {
