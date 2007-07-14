@@ -6,7 +6,7 @@ use warnings;
 use Carp;
 use List::Util qw(first);
 use Config;
-use constant WINDOWS => ($^O eq'MSWin32');
+use constant WINDOWS => ($^O eq 'MSWin32');
 use if WINDOWS, 'Win32::Process', qw(INFINITE NORMAL_PRIORITY_CLASS);
 use if WINDOWS, 'Win32';
 use POSIX qw(WIFEXITED WEXITSTATUS WIFSIGNALED WTERMSIG);
@@ -41,7 +41,11 @@ sub run {
 
 	# With the wonders of constant folding the following code
 	# is completely optimised away under non-windows systems.
-	if (WINDOWS) {
+
+	# The following essentially emulates multi-argument system,
+	# bypassing the shell entirely.
+
+	if (WINDOWS and @args) {
 		our $EXITVAL = -1;
 		my $pid;
 		my $success = Win32::Process::Create(
@@ -58,7 +62,8 @@ sub run {
 		return _check_exit($command,$EXITVAL,$valid_returns);
 	}
 
-	# On non-Win32 systems, we have an easier time.
+	# On non-Win32 systems, or when we don't have multiple argument,
+	# we have an easier time.
 
 	# We're throwing our own exception on command not found.
 	# We don't need a warning from Perl.
@@ -66,84 +71,6 @@ sub run {
 	system($command,@args);
 
 	return _process_child_error($?,$command,$valid_returns);
-}
-
-# Capture output of command.  Identical semantics to qx()
-
-# TODO - List pipe not implemented on win32
-
-# TODO - Stash the command output somewhere, so it can be retrieved
-#        on exception.
-
-# TODO - One arg should allow shell.  Multi args should not.
-
-# XXX - A lot of this should be replacable with a call to readpipe()
-
-sub capture {
-	my ($valid_returns, $command, @args) = _process_args(@_);
-
-	my $command_fh;
-
-	# Under windows we have two problems.  Firstly, as of
-	# 5.8.8 no Perl implements multi-arg piped open.  Secondly,
-	# a failed open will end up invoking the shell and it make
-	# it impossible to tell if it's actually failed.
-
-	if (WINDOWS) {
-		if (@args == 1 and _win32_has_shell_metachars($args[0])) {
-			no warnings 'exec';
-			open(my $command_fh, "-|", $command, @args)
-				or croak qq{"$command" failed to start "$!"};
-		} else {
-
-			# XXX This doesn't work!
-
-			pipe($command_fh, my $child_fh);
-			my $r = fork();
-			if (not defined $r) {
-				croak qq{"$command" failed to start "Fork failed: $!"};
-			} elsif ($r) {
-				# Parent
-				warn "in parent\n";
-				close($child_fh);
-				warn "Child fh closed\n";
-			} else {
-				# Child
-				warn "In child\n";
-				close($command_fh);
-				warn "command fh closed\n";
-				# Redirect STDOUT manually.
-				open(STDOUT,'>&',$child_fh) or die"Cannot dup\n";
-				warn "STDOUT redired\n";
-				# Finally exec!
-				# Crap!  This doesn't let us know
-				# if the command failed either.
-				exec($command,@args);
-				die "Exec failed!\n";
-			}
-		}
-	} else {
-		# We're throwing our own exception on command not found.
-		# We don't need a warning from Perl.
-		no warnings 'exec';
-
-		open($command_fh, "-|", $command, @args)
-			or croak qq{"$command" failed to start "$!"};
-	}
-
-	if (wantarray()) {
-		my @return = <$command_fh>;
-		close($command_fh);
-		_process_child_error($?,$command,$valid_returns);
-		return @return;
-	}
-
-	local $/;
-	my $return = <$command_fh>;
-	close($command_fh);
-
-	_process_child_error($?,$command, $valid_returns);
-	return $return;
 }
 
 # This subroutine performs the difficult task of interpreting
@@ -175,6 +102,10 @@ sub _process_child_error {
 	croak qq{Internal error in IPC::System::Simple - "$command" ran without exit value or signal};
 
 }
+
+# A simple subroutine for checking exit values.  Results in better
+# assurance of consistent error messages, and better forward support
+# for new features in I::S::S.
 
 sub _check_exit {
 	my ($command,$exitval, $valid_returns) = @_;
@@ -209,34 +140,6 @@ sub _process_args {
 	return ($valid_returns,$command,@_);
 
 }
-
-# This is the same algorithm as has_shell_metachars() in the win32.c
-# file in the Perl core itself.
-
-sub _win32_has_shell_metachars {
-	my $inquote;
-	my $quote;
-	for (my $i = 0; $i < length($_[0]); $i++) {
-		my $c = substr($_[0],$i,1);
-		if ($c eq "%")  { 
-			return 1;
-		} elsif ($c eq q{'} or $c eq q{"}) {
-			if ($inquote and $c eq $quote) {
-				undef $quote;
-				$inquote = 0;
-			} else {
-				$quote = $c;
-				$inquote = 1;
-			}
-		} elsif ($c eq '<' or $c eq '>' or $c eq '|') {
-			if (not $inquote) {
-				return 1;
-			}
-		}
-	}
-	return 0;
-}
-
 
 1;
 __END__

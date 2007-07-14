@@ -10,7 +10,7 @@ use_ok('IPC::System::Simple', qw(run));
 # from the Windows and Unix shells respectively.
 
 # Bad command, run
-eval { run([1,127],"xyzzy42this_command_does_not_exist"); };
+eval { run([1,127],"xyzzy42this_command_does_not_exist","foo"); };
 like ($@, qr{failed to start}, "Non-existant, run ");
 
 __END__
