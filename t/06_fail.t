@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 use strict;
-use Test::More tests => 2;
+use Test::More tests => 4;
 use Config;
 
 use_ok('IPC::System::Simple', qw(run));
@@ -12,6 +12,14 @@ use_ok('IPC::System::Simple', qw(run));
 # Bad command, run
 eval { run([1,127],"xyzzy42this_command_does_not_exist","foo"); };
 like ($@, qr{failed to start}, "Non-existant, run ");
+
+# Bad calls to I::S::Simple
+
+eval { run(); };
+like($@, qr{IPC::System::Simple::run called with no arguments},"Empty call to run");
+
+eval { run([0..5]); };
+like($@, qr{IPC::System::Simple::run called with no command},"No command passed to run");
 
 __END__
 
