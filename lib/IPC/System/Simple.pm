@@ -296,6 +296,14 @@ BUGS below.
 
 =back
 
+=head1 DEPENDENCIES
+
+This module depends upon L<Win32::Process> when used on Win32
+system.  C<Win32::Process> is bundled as a core module in ActivePerl 5.6
+and above.
+
+There are no non-core dependencies on non-Win32 systems.
+
 =head1 BUGS
 
 Reporting of core-dumps is not yet implemented.
@@ -308,7 +316,7 @@ Please report bugs to L<http://rt.cpan.org/Public/Dist/Display.html?Name=IPC-Sys
 
 =head1 SEE ALSO
 
-L<POSIX> L<IPC::Run::Simple> L<perlipc> L<perlport> L<IPC::Run>
+L<POSIX> L<IPC::Run::Simple> L<perlipc> L<perlport> L<IPC::Run> L<Win32::Process>
 
 =head1 AUTHOR
 
