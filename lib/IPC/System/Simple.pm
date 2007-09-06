@@ -7,7 +7,7 @@ use Carp;
 use List::Util qw(first);
 use Config;
 use constant WINDOWS => ($^O eq 'MSWin32');
-use constant EXPERIMENTAL => 0;		# Enable experimental features?
+use constant EXPERIMENTAL => 1;		# Enable experimental features?
 use if (WINDOWS and EXPERIMENTAL), 'Win32::Process', qw(INFINITE NORMAL_PRIORITY_CLASS);
 use if (WINDOWS and EXPERIMENTAL), 'Win32';
 use POSIX qw(WIFEXITED WEXITSTATUS WIFSIGNALED WTERMSIG);
@@ -68,8 +68,8 @@ sub run {
 	# On non-Win32 systems, or when we don't have multiple argument,
 	# we have an easier time.
 
-	# We're throwing our own exception on command not found.
-	# We don't need a warning from Perl.
+	# We're throwing our own exception on command not found, so
+	# we don't need a warning from Perl.
 	no warnings 'exec';
 	system($command,@args);
 

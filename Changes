@@ -28,4 +28,8 @@ Revision history for Perl extension IPC::System::Simple.
 0.06
 	- Warnings are no longer emitted on failed calls to system().
 	- Multiple argument run() no longer uses the shell under Win32.
-	- README improved.
+	- 16-bit native exit values are now returned on Win32 systems.
+	- WIF* POSIX commands that are not defined are more correctly
+	  handled, particularly under Perl 5.6.  Thanks to Laurent
+	  Laporte for the bug report (RT #29080).
+	- README and POD improved.
