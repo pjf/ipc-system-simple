@@ -13,7 +13,7 @@ if ($^O ne 'VMS') {
 }
 
 use_ok("IPC::System::Simple","run");
-chdir("t");
+chdir("t");	# Ignore return, since we may already be in t/
 
 run($perl_path,"exiter.pl",0);
 ok(1);
@@ -29,13 +29,13 @@ foreach (1..5,250..255) {
 
 # Single arg tests
 
-run($perl_path,"exiter.pl 0");
+run("$perl_path exiter.pl 0");
 ok(1);
 
 foreach (1..5,250..255) {
 
 	eval {
-		run($perl_path,"exiter.pl $_");
+		run("$perl_path exiter.pl $_");
 	};
 
 	like($@, qr/unexpectedly returned exit value $_/ );
