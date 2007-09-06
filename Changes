@@ -25,7 +25,7 @@ Revision history for Perl extension IPC::System::Simple.
 	  unexpected exit values and an internal error message.  Thanks
 	  to Jon Swartz for spotting these.
 
-0.06
+0.06  Thu Sep  6 18:09:50 AUSEST 2007
 	- Warnings are no longer emitted on failed calls to system().
 	- Multiple argument run() no longer uses the shell under Win32.
 	- 16-bit native exit values are now returned on Win32 systems.
