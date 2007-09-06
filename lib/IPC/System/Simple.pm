@@ -143,7 +143,9 @@ sub _process_args {
 }
 
 1;
+
 __END__
+
 =head1 NAME
 
 IPC::System::Simple - Call system() commands with a minimum of fuss
