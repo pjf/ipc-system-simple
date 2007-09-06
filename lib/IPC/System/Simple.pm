@@ -7,8 +7,9 @@ use Carp;
 use List::Util qw(first);
 use Config;
 use constant WINDOWS => ($^O eq 'MSWin32');
-use if WINDOWS, 'Win32::Process', qw(INFINITE NORMAL_PRIORITY_CLASS);
-use if WINDOWS, 'Win32';
+use constant EXPERIMENTAL => 0;		# Enable experimental features?
+use if (WINDOWS and EXPERIMENTAL), 'Win32::Process', qw(INFINITE NORMAL_PRIORITY_CLASS);
+use if (WINDOWS and EXPERIMENTAL), 'Win32';
 use POSIX qw(WIFEXITED WEXITSTATUS WIFSIGNALED WTERMSIG);
 
 require Exporter;
@@ -26,11 +27,13 @@ my @Signal_from_number = split(' ', $Config{sig_name});
 
 eval { WIFEXITED(0); };
 
-if ($@ =~ /not defined POSIX macro/) {
+if ($@ =~ /not (?:defined|a valid) POSIX macro/) {
 	*WIFEXITED   = sub { not $_[0] & 0xff };
 	*WEXITSTATUS = sub { $_[0] >> 8  };
 	*WIFSIGNALED = sub { $_[0] & 127 };
 	*WTERMSIG    = sub { $_[0] & 127 };
+} elsif ($@) {
+	croak "IPC::System::Simple does not understand the POSIX error '$@'.  Please check http://search.cpan.org/perldoc?IPC::System::Simple to see if there is an updated version.  If not please report this as a bug to http://rt.cpan.org/Public/Bug/Report.html?Queue=IPC-System-Simple";
 }
 
 # TODO - This doesn't look for core-dumps yet.
@@ -45,7 +48,7 @@ sub run {
 	# The following essentially emulates multi-argument system,
 	# bypassing the shell entirely.
 
-	if (WINDOWS and @args) {
+	if (EXPERIMENTAL and WINDOWS and @args) {
 		our $EXITVAL = -1;
 		my $pid;
 		my $success = Win32::Process::Create(
