@@ -152,15 +152,13 @@ IPC::System::Simple - Call system() commands with a minimum of fuss
 
 =head1 SYNOPSIS
 
-  use IPC::System::Simple qw(run capture $EXITVAL);
+  use IPC::System::Simple qw(run $EXITVAL);
 
   run("some_command");        # Run a command and check exit status
 
   run("some_command",@args);  # Run a command, avoiding the shell
 
   my $exit_value = run([0..5], "some_command", @args);
-
-  my $program_output = capture("some_command");
 
   print "some_command exited with status $EXITVAL\n";
 
@@ -227,37 +225,24 @@ The C<run> subroutine returns the exit value of the process:
 
 	print "Program exited with value $exit_value\n";
 
-=head2 capture
-
-	my $output       = capture("cat *.txt");
-	my @output_lines = capture("cat *.txt");
-
-The C<capture> subroutine has identical semantics to Perl's built-in
-backticks operator.  In scalar context, C<capture> will return
-the output of the command specified.  In list context,
-C<capture> will return a list of records, separated by
-the contents of C<$/>, just like backticks.  In a void
-context C<capture> will execute the command requested, but supress
-its output.
-
-Just like C<run>, the C<capture> subroutine will throw an exception
-if the command fails to start, dies from a signal, or exits with
-a non-zero exit status.  Just like run, a list of acceptable return
-values can be passed as an array-reference in the first argument:
-
-	my $output = capture( [0..5], "cat *.txt");
-
-C<capture> can also be called with multiple arguments, in which
-case the shell is bypassed, identical to the multi-argument
-form of C<system>.  Multi-argument C<capture> is not implemented
-on Windows system.
-
 =head2 $EXITVAL
 
 After a call to C<run> or C<capture> the exit value of the command
 is always available in C<$IPC::System::Simple::EXITVAL>.  This will
 be set to C<-1> if the command did not exit normally (eg,
 being terminated by a signal) or did not start.
+
+=head2 WINDOWS-SPECIFIC NOTES
+
+As of C<IPC::System::Simple> v0.06, the C<run> subroutine I<when
+called with multiple arguments> will make available the full 16-bit
+return value on Win32 systems.  This is different from the
+previous versions of C<IPC::System::Simple> and from Perl's
+in-build C<system()> function, which can only handle 8-bit return values.
+
+Signals are not supported on Windows systems.  Sending a signal
+to a Windows process will usually cause it to exit with the signal
+number used.
 
 =head1 DIAGNOSTICS
 
@@ -313,6 +298,11 @@ Reporting of core-dumps is not yet implemented.
 WIFSTOPPED status is not checked.
 
 Signals are not supported under Win32 systems.
+
+16-bit exit values are provided when C<run()> is called with multiple
+arguments under Windows, but only 8-bit values are returned when
+C<run()> is called with a single value.  We should always return 16-bit
+value on systems that support them.
 
 Please report bugs to L<http://rt.cpan.org/Public/Dist/Display.html?Name=IPC-System-Simple> .
 
