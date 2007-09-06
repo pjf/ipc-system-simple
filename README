@@ -12,7 +12,9 @@ To install this module type the following:
 
 DEPENDENCIES
 
-This module has no dependencies.
+This module depends upon Win32::Process when working on Win32
+systems.  ActivePerl 5.6.1 and above have this bundled as part
+of their standard distribution.
 
 COPYRIGHT AND LICENCE
 

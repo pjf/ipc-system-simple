@@ -7,9 +7,7 @@ use Carp;
 use List::Util qw(first);
 use Config;
 use constant WINDOWS => ($^O eq 'MSWin32');
-use constant EXPERIMENTAL => 1;		# Enable experimental features?
-use if (WINDOWS and EXPERIMENTAL), 'Win32::Process', qw(INFINITE NORMAL_PRIORITY_CLASS);
-use if (WINDOWS and EXPERIMENTAL), 'Win32';
+use if WINDOWS, 'Win32::Process', qw(INFINITE NORMAL_PRIORITY_CLASS);
 use POSIX qw(WIFEXITED WEXITSTATUS WIFSIGNALED WTERMSIG);
 
 require Exporter;
@@ -48,7 +46,7 @@ sub run {
 	# The following essentially emulates multi-argument system,
 	# bypassing the shell entirely.
 
-	if (EXPERIMENTAL and WINDOWS and @args) {
+	if (WINDOWS and @args) {
 		our $EXITVAL = -1;
 		my $pid;
 		my $success = Win32::Process::Create(
