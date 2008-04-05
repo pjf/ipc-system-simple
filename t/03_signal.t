@@ -26,7 +26,7 @@ run([1],$perl_path,"signaler.pl",0);
 ok(1);
 
 eval {
-	run([1],$perl_path,"signaler.pl",2);	# SIGINT on most systems.
+	run([1],$perl_path,"signaler.pl",9);	# SIGKILL on most systems.
 };
 
 like($@, qr/died to signal/);
