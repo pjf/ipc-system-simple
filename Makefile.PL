@@ -6,7 +6,12 @@ use ExtUtils::MakeMaker;
 WriteMakefile(
     NAME              => 'IPC::System::Simple',
     VERSION_FROM      => 'lib/IPC/System/Simple.pm', # finds $VERSION
-    PREREQ_PM         => (WINDOWS ? { 'Win32::Process' => 0 } : {} ),
+    PREREQ_PM         => {
+	'Config'      => 0,
+	'List::Util'  => 0,
+	'Scalar::Util'=> 0,
+	(WINDOWS ? ( 'Win32::Process' => 0 ) : ())
+    },
     ($ExtUtils::MakeMaker::VERSION > 6.30 ?
       ( LICENSE           => 'perl' ) : ()
     ),
