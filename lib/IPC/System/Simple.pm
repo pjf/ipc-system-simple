@@ -14,7 +14,7 @@ use POSIX qw(WIFEXITED WEXITSTATUS WIFSIGNALED WTERMSIG);
 
 require Exporter;
 our @ISA = qw(Exporter);
-our @EXPORT_OK = qw( run capture $EXITVAL );
+our @EXPORT_OK = qw( run $EXITVAL );
 our $VERSION = '0.07';
 our $EXITVAL = -1;
 
@@ -204,10 +204,10 @@ Perl's built-in C<system>:
 	run("cat","/etc/motd");		# Execute command without shell
 
 In the case where the command returns an unexpected status,
-C<run> will throw an exception, which is not caught will terminate
+C<run> will throw an exception, which if not caught will terminate
 your program with an error.
 
-Capturing an the exception is easy:
+Capturing the exception is easy:
 
 	eval {
 		run("cat *.txt");
@@ -307,7 +307,7 @@ start (as determined from C<$!>) will be provided.
 
 =item "%s" unexpectedly returned exit value %d
 
-The command ran successful, but returned an exit value we did
+The command ran successfully, but returned an exit value we did
 not expect.  The value returned is reported.
 
 =item "%s" died to signal "%s" (%d)
@@ -319,7 +319,7 @@ signal number is always reported.
 =item Internal error in IPC::System::Simple - "%s" ran without exit value or signal
 
 You've found a bug in C<IPC::System::Simple>.  It knows your command
-ran successful, but doesn't know how or why it stopped.  Please
+ran successfully, but doesn't know how or why it stopped.  Please
 report this error using the submission mechanism described in
 BUGS below.
 

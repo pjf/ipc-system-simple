@@ -13,7 +13,7 @@ if ($^O ne 'VMS') {
 		unless $perl_path =~ m/$Config{_exe}$/i;
 }
 
-# Win32 systms don't support multi-arg pipes.  Our
+# Win32 systems don't support multi-arg pipes.  Our
 # simple captures will begin with single-arg tests.
 my $output_exe = "$perl_path output.pl";
 

@@ -42,3 +42,7 @@ Revision history for Perl extension IPC::System::Simple.
 	  environment, and provides helpful diagnostics if found.
 	- Removed mention of unimplemented capture() command in
 	  documentation.
+
+0.08
+	- Numerous documentation fixes thanks to Matt Kraai
+	  (RT #34896)
