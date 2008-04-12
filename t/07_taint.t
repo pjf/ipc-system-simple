@@ -34,7 +34,7 @@ SKIP: {
 	like($@,qr{called with tainted environment},"Multi-arg, tainted ENV");
 }
 
-delete @ENV{qw(PATH IFS CDPATH ENV BASH_ENV)};
+delete @ENV{qw(PATH IFS CDPATH ENV BASH_ENV PERL5SHELL DCL$PATH)};
 
 eval { run("$perl_path exiter.pl $evil_zero"); };
 like($@,qr{called with tainted argument},"Single-arg, tainted data");
