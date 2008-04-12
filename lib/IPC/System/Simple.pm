@@ -253,10 +253,10 @@ The C<run> subroutine returns the exit value of the process:
 
 =head2 $EXITVAL
 
-After a call to C<run> or C<capture> the exit value of the command
-is always available in C<$IPC::System::Simple::EXITVAL>.  This will
-be set to C<-1> if the command did not exit normally (eg,
-being terminated by a signal) or did not start.
+After a call to C<run> the exit value of the command is always
+available in C<$IPC::System::Simple::EXITVAL>.  This will be set to
+C<-1> if the command did not exit normally (eg, being terminated by a
+signal) or did not start.
 
 =head2 WINDOWS-SPECIFIC NOTES
 

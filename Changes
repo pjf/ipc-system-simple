@@ -40,3 +40,5 @@ Revision history for Perl extension IPC::System::Simple.
 	- All dependencies now explicitly stated in Makefile.PL.
 	- run() now explicitly checked for tainted arguments and
 	  environment, and provides helpful diagnostics if found.
+	- Removed mention of unimplemented capture() command in
+	  documentation.
