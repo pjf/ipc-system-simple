@@ -5,8 +5,10 @@ use strict;
 use warnings;
 use Carp;
 use List::Util qw(first);
+use Scalar::Util qw(tainted);
 use Config;
 use constant WINDOWS => ($^O eq 'MSWin32');
+use constant VMS     => ($^O eq 'VMS');
 use if WINDOWS, 'Win32::Process', qw(INFINITE NORMAL_PRIORITY_CLASS);
 use POSIX qw(WIFEXITED WEXITSTATUS WIFSIGNALED WTERMSIG);
 
@@ -17,6 +19,15 @@ our $VERSION = '0.06_01';
 our $EXITVAL = -1;
 
 my @Signal_from_number = split(' ', $Config{sig_name});
+
+# Environment variables we don't want to see tainted.
+my @Check_tainted_env = qw(PATH IFS CDPATH ENV BASH_ENV);
+if (WINDOWS) {
+	push(@Check_tainted_env, 'PERL5SHELL');
+}
+if (VMS) {
+	push(@Check_tainted_env, 'DCL$PATH');
+}
 
 # Not all systems implment the WIFEXITED calls, but POSIX
 # will always export them (even if they're just stubs that
@@ -38,6 +49,21 @@ if ($@ =~ /not (?:defined|a valid) POSIX macro/) {
 # TODO - WTF is a WIFSTOPPED and how can it hurt us?
 
 sub run {
+
+	# Complain on tainted arguments or environment.
+	if (${^TAINT}) {
+		foreach my $var (@_) {
+			if (tainted $var) {
+				croak qq{IPC::System::Simple::run called with tainted argument '$var'};
+			}
+		}
+		foreach my $var (@Check_tainted_env) {
+			if (tainted $ENV{$var} ) {
+				croak qq{IPC::System::Simple::run called with tainted environment \$ENV{$var}};
+			}
+		}
+	}
+
 	my ($valid_returns, $command, @args) = _process_args(@_);
 
 	# With the wonders of constant folding the following code
@@ -256,6 +282,22 @@ You attempted to call C<run> but did not provide any arguments at all.
 
 You called C<run> with a list of acceptable exit values, but no
 actual command.
+
+=item IPC::System::Simple::run called with tainted argument '%s'
+
+You called C<run> with tainted (untrusted) arguments, which is almost
+certainly a bad idea.  To untaint your arguments you'll need to
+pass your data through a regular expression and use the resulting
+match variables.  See L<perlsec/Laundering and Detecting Tainted Data>
+for more information.
+
+=item IPC::System::Simple::run called with tainted environment $ENV{%s}
+
+You called C<run> but part of your environment was tainted
+(untrusted).  You should either delete the named environment
+varaible before calling C<run>, or set it to an untainted value
+(usually one set inside your program).  See
+L<perlsec/Cleaning Up Your Path> for more information.
 
 =item "%s" failed to start: "%s"
 

@@ -9,6 +9,7 @@ t/03_signal.t
 t/04_capture.t
 t/05_multi_capture.t
 t/06_fail.t
+t/07_taint.t
 t/exiter.pl
 t/internal.t
 t/kwalitee.t

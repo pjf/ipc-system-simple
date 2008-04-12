@@ -38,3 +38,5 @@ Revision history for Perl extension IPC::System::Simple.
 	- Changed tests to use SIGKILL rather than SIGINT to avoid
 	  complications on systems where SIGINT is masked.
 	- All dependencies now explicitly stated in Makefile.PL.
+	- run() now explicitly checked for tainted arguments and
+	  environment, and provides helpful diagnostics if found.
