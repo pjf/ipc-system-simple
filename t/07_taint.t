@@ -16,7 +16,7 @@ ok(! tainted($perl_path), '$perl_path is clean');
 use_ok("IPC::System::Simple","run");
 chdir("t");     # Ignore return, since we may already be in t/
 
-my $taint = $ENV{(keys(%ENV))[0]};
+my $taint = $ENV{(keys(%ENV))[0]} . "foo";	# ."foo" to avoid zero length
 ok(tainted($taint),"Sanity - ENV vars are tainted");
 
 my $evil_zero = 1 - (length($taint) / length($taint));

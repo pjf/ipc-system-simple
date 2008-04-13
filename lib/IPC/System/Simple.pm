@@ -12,10 +12,15 @@ use constant VMS     => ($^O eq 'VMS');
 use if WINDOWS, 'Win32::Process', qw(INFINITE NORMAL_PRIORITY_CLASS);
 use POSIX qw(WIFEXITED WEXITSTATUS WIFSIGNALED WTERMSIG);
 
+# On Perl's older than 5.8.x we can't assume that there'll be a
+# $^{TAINT} for us to check, so we assume that our args may always
+# be tainted.
+use constant ASSUME_TAINTED => ($] < 5.008);
+
 require Exporter;
 our @ISA = qw(Exporter);
 our @EXPORT_OK = qw( run $EXITVAL );
-our $VERSION = '0.07';
+our $VERSION = '0.08';
 our $EXITVAL = -1;
 
 my @Signal_from_number = split(' ', $Config{sig_name});
@@ -51,7 +56,8 @@ if ($@ =~ /not (?:defined|a valid) POSIX macro/) {
 sub run {
 
 	# Complain on tainted arguments or environment.
-	if (${^TAINT}) {
+	# ASSUMED_TAINTED is true for 5.6.x, since it's missing ${^TAINT}
+	if (ASSUME_TAINTED or ${^TAINT}) {
 		foreach my $var (@_) {
 			if (tainted $var) {
 				croak qq{IPC::System::Simple::run called with tainted argument '$var'};
