@@ -43,7 +43,7 @@ Revision history for Perl extension IPC::System::Simple.
 	- Removed mention of unimplemented capture() command in
 	  documentation.
 
-0.08
+0.08  Sun Apr 13 13:38:49 AUSEST 2008
 	- Numerous documentation fixes thanks to Matt Kraai
 	  (RT #34896)
 	- Updated t/07_taint.t to not fail on systems that have
