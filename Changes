@@ -50,3 +50,7 @@ Revision history for Perl extension IPC::System::Simple.
 	  zero-length environment strings.
 	- Updated taint checks to always run on 5.6.x, under
 	  0.07 they would never run on older perls.
+
+0.09
+	- Test suite now provides better diagnostics if taint
+	  tests fail unexpectedly early.

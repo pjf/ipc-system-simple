@@ -20,7 +20,7 @@ use constant ASSUME_TAINTED => ($] < 5.008);
 require Exporter;
 our @ISA = qw(Exporter);
 our @EXPORT_OK = qw( run $EXITVAL );
-our $VERSION = '0.08';
+our $VERSION = '0.09';
 our $EXITVAL = -1;
 
 my @Signal_from_number = split(' ', $Config{sig_name});
@@ -90,6 +90,10 @@ sub run {
 				$command, $^E
 			);
 		}
+
+		# TODO: If we failed to start, it may just be in our
+		#       PATH.  Traverse and check!
+
 		$pid->Wait(INFINITE);	# Wait for process exit.
 		$pid->GetExitCode($EXITVAL);
 		return _check_exit($command,$EXITVAL,$valid_returns);
