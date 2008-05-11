@@ -162,6 +162,12 @@ sub capture {
 		pipe(my ($read_fh, $write_fh))
 			or die "Internal error: Can't open pipe";
 
+		# Allow CRLF sequences to become "\n", since
+		# I believe this is what Perl backticks do.
+		# XXX - Is this a good idea?
+
+		binmode($read_fh, ':crlf');
+
 		# Now we re-open our STDOUT to $write_fh...
 		open(STDOUT, '>&', $write_fh);
 
