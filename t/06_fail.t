@@ -1,9 +1,9 @@
 #!/usr/bin/perl -w
 use strict;
-use Test::More tests => 4;
+use Test::More tests => 6;
 use Config;
 
-use_ok('IPC::System::Simple', qw(run));
+use_ok('IPC::System::Simple', qw(run capture));
 
 # Run a command that doesn't exist.  The exit values
 # 1 and 127 are special, as they indicate command-not-found
@@ -20,11 +20,6 @@ like($@, qr{IPC::System::Simple::run called with no arguments},"Empty call to ru
 
 eval { run([0..5]); };
 like($@, qr{IPC::System::Simple::run called with no command},"No command passed to run");
-
-__END__
-
-# These tests are for the next IPC::System::Simple release,
-# which supports capture()
 
 # Bad command, capture
 eval { capture([1,127],"xyzzy42this_command_does_not_exist"); };

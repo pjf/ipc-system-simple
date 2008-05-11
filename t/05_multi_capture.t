@@ -2,11 +2,12 @@
 use strict;
 use Config;
 use Test::More;
+use constant NO_SUCH_CMD => "this_command_had_better_not_exist_either";
 
 if ($^O eq "MSWin32") {
 	plan skip_all => "Multi-arg pipes not supported under Win32";
 } else {
-	plan tests => 9;
+	plan tests => 11;
 }
 
 # We want to invoke our sub-commands using Perl.
@@ -42,10 +43,19 @@ is($/,"\n",'$/ intact');
 
 # List capture with odd $/
 
-$/ = "e";
-my @odd_output = capture($perl_path,"output.pl",0);
-ok(1);
+{
+	local $/ = "e";
+	my @odd_output = capture($perl_path,"output.pl",0);
+	ok(1);
 
-is_deeply(\@odd_output,["He","llo\nGoodbye","\n"], 'Odd $/ capture');
+	is_deeply(\@odd_output,["He","llo\nGoodbye","\n"], 'Odd $/ capture');
 
+}
 
+my $no_output;
+eval {
+        $no_output = capture(NO_SUCH_CMD,1);
+};
+
+like($@,qr/failed to start/, "failed capture");
+is($no_output,undef, "No output from failed command");

@@ -38,7 +38,7 @@ is($/,"\n","IFS intact");
 
 my $no_output;
 eval {
-	$no_output = capture(NO_SUCH_CMD,1);
+	$no_output = capture(NO_SUCH_CMD);
 };
 
 like($@,qr/failed to start/, "failed capture");
