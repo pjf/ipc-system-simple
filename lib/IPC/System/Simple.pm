@@ -280,17 +280,26 @@ IPC::System::Simple - Call system() commands with a minimum of fuss
 
   use IPC::System::Simple qw(capture run $EXITVAL);
 
-  run("some_command");        # Run a command and check exit status
+  # Run a command, throwing exception on failure
+
+  run("some_command");
 
   run("some_command",@args);  # Run a command, avoiding the shell
 
+  # Run a command which must return 0..5, avoid the shell, and get the
+  # exit value (we could also look at $EXITVAL)
+
   my $exit_value = run([0..5], "some_command", @args);
+
+  # Run a command, capture output into $result and throw exception on failure
+
+  my $result = capture("some_command");	
+
+  # Check exit value from captured command
 
   print "some_command exited with status $EXITVAL\n";
 
-  my $result = capture("some_command");	# Captures output into $result
-
-  my @lines  = capture("some_command"); # Captures into lines, splitting on $/
+  my @lines = capture("some_command"); # Captures into @lines, splitting on $/
 
   # Run a command which must return 0..5, capture the output into
   # @lines, and avoid the shell.
@@ -318,7 +327,7 @@ Perl's built-in C<system>:
 =head2 capture
 
 A second subroutine, named C<capture> executes a command with
-the same semantics as Perl's built-in backticks:
+the same semantics as Perl's built-in backticks (and C<qx()>):
 
 	use IPC::System::Simple qw(capture);
 
@@ -349,6 +358,8 @@ Capturing the exception is easy:
 
 See the diagnostics section below for more details.
 
+=head3 Exception cases
+
 C<IPC::System::Simple> considers the following to be unexpected,
 and worthy of exception:
 
@@ -366,12 +377,20 @@ Returning an exit value other than zero (but see below).
 
 Being killed by a signal.
 
+=item *
+
+Being passed tainted data (in taint mode).
+
 =back
 
 =head2 Exit values
 
-You may specify a range of values which are considered acceptable
-return values by passing an I<array reference> as the first argument:
+Traditionally, system commands return a zero status for success and a
+non-zero status for failure.  C<IPC::System::Simple> will default to throwing
+an exception if a non-zero exit value is returned.
+
+You may specify a range of values which are considered acceptable exit
+values by passing an I<array reference> as the first argument:
 
 	run( [0..5], "cat *.txt");                   # Exit values 0-5 are OK
 
@@ -445,7 +464,7 @@ for more information.
 
 You called C<run> but part of your environment was tainted
 (untrusted).  You should either delete the named environment
-varaible before calling C<run>, or set it to an untainted value
+variable before calling C<run>, or set it to an untainted value
 (usually one set inside your program).  See
 L<perlsec/Cleaning Up Your Path> for more information.
 
