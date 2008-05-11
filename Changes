@@ -54,6 +54,8 @@ Revision history for Perl extension IPC::System::Simple.
 0.09
 	- Test suite now provides better diagnostics if taint
 	  tests fail unexpectedly early.
-	- Multi-argument run() will now search our PATH
+	- Multi-argument run() will now search $ENV{PATH}
 	  under Win32.
+	- Documented $ENV{PATH} foibles on Win32 systems under
+	  the Windows-specific notes section of the documentation.
 

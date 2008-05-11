@@ -109,12 +109,6 @@ sub run {
 			foreach my $dir (@path) {
 				my $fullpath = "$dir\\$command";
 				if (-x $fullpath) {
-
-					# TODO: This currently tries
-					# to find other executables on
-					# failure.  Should we give-up
-					# on our first failure?
-
 					$spawn->($fullpath,"$command @args")
 						and last LAUNCH;
 
@@ -312,6 +306,13 @@ called with multiple arguments> will make available the full 16-bit
 return value on Win32 systems.  This is different from the
 previous versions of C<IPC::System::Simple> and from Perl's
 in-build C<system()> function, which can only handle 8-bit return values.
+
+Versions of C<IPC::System::Simple> before v0.09 would not search
+the C<PATH> environment variable when the multi-argument form of
+C<run()> was called.  Versions from v0.09 onwards correctly search
+the path provided the command is provided including the extension
+(eg, C<notepad.exe> rather than just C<notepad>, or C<gvim.bat> rather
+than just C<gvim>).
 
 Signals are not supported on Windows systems.  Sending a signal
 to a Windows process will usually cause it to exit with the signal
