@@ -274,6 +274,9 @@ sub _check_taint {
 			croak qq{IPC::System::Simple::run called with tainted environment \$ENV{$var}};
 		}
 	}
+
+	return;
+
 }
 
 # This subroutine performs the difficult task of interpreting
