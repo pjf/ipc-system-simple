@@ -4,11 +4,7 @@ use Config;
 use Test::More;
 use constant NO_SUCH_CMD => "this_command_had_better_not_exist_either";
 
-if ($^O eq "MSWin32") {
-	plan skip_all => "Multi-arg pipes not supported under Win32";
-} else {
-	plan tests => 11;
-}
+plan tests => 11;
 
 # We want to invoke our sub-commands using Perl.
 

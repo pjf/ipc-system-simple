@@ -3,6 +3,7 @@ package IPC::System::Simple;
 use 5.006;
 use strict;
 use warnings;
+use re 'taint';
 use Carp;
 use List::Util qw(first);
 use Scalar::Util qw(tainted);
@@ -107,10 +108,7 @@ sub run {
 			# If we're here, then we couldn't launch our
 			# process, even if we tried to walk the path.
 
-			croak sprintf(
-				q{"%s" failed to start: "%s"},
-				$command, $^E
-			);
+			croak sprintf(FAIL_START, $command, $^E);
 		}
 
 
@@ -138,6 +136,78 @@ sub capture {
 	our $EXITVAL = -1;
 
 	my $wantarray = wantarray();
+
+	if (WINDOWS) {
+		# Perl doesn't support multi-arg backticks under
+		# Windows.  Perl also doesn't provide very good
+		# feedback when normal backtails fail, either,
+		# instead returning the exit status from the shell
+		# (which is indistinguishable from the command
+		# running and producing the same exit status).
+
+		# As such, we essentially have to write our own
+		# backticks.
+
+		# We start by dup'ing STDOUT.
+		# XXX - Fix our diagnostics.
+		# XXX - Flush buffers first?
+
+		open(my $saved_stdout, '>&', \*STDOUT)
+			or die "Internal error: Can't dup STDOUT";
+
+		# We now open up a pipe that will allow us to	
+		# communicate with the new process.
+
+		# XXX - Fix our diagnostics.
+		pipe(my ($read_fh, $write_fh))
+			or die "Internal error: Can't open pipe";
+
+		# Now we re-open our STDOUT to $write_fh...
+		open(STDOUT, '>&', $write_fh);
+
+		# And now we spawn our new process with inherited
+		# filehandles.
+
+		# XXX - Search PATH properly.
+		# XXX - Format diagnostics properly.
+
+		my $exe = @args                      ? $command :
+			  $command =~ m{^"([^"]+)"}x ? $1       :
+			  $command =~ m{(\S+)     }x ? $1       :
+			  croak("Cannot find command in $command");
+
+		Win32::Process::Create(
+			my $pid, $exe, "$command @args", 1, NORMAL_PRIORITY_CLASS, "."
+		) or croak(sprintf FAIL_START,"$command",$^E);
+
+		# Now restore our STDOUT.
+		open(STDOUT, '>&', $saved_stdout)
+			or die "Internal error: Can't restore STDOUT";
+
+		# Clean-up the filehandles we no longer need...
+
+		close($write_fh);
+		close($saved_stdout);
+
+		# Read the data from our child...
+
+		my (@results, $result);
+
+		if ($wantarray) {
+			@results = <$read_fh>;
+		} else {
+			$result = join("",<$read_fh>);
+		}
+
+		# Tidy up our windows process and we're done!
+
+		$pid->Wait(INFINITE);	# Wait for process exit.
+		$pid->GetExitCode($EXITVAL);
+
+		_check_exit($command,$EXITVAL,$valid_returns);
+
+		return $wantarray ? @results : $result;
+	}
 
 	if (WINDOWS and @args) {
 		croak "capture under Win32 unimplemented";
