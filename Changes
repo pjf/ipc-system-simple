@@ -60,3 +60,5 @@ Revision history for Perl extension IPC::System::Simple.
 	  the Windows-specific notes section of the documentation.
 	- Implemented capture(), which is the equivalent
 	  of run() for backticks.
+	- General documentation improvements and clarifications,
+	  thanks to Jacinta Richardson.
