@@ -1,8 +1,8 @@
 #!/usr/bin/perl -w
 use strict;
-# use Test::More tests => 7;
-use Test::More skip_all => "Unimplemented";
+use Test::More tests => 9;
 use Config;
+use constant NO_SUCH_CMD => "this_command_had_better_not_exist";
 
 # We want to invoke our sub-commands using Perl.
 
@@ -36,3 +36,10 @@ ok(1);
 is_deeply(\@output,["Hello\n", "Goodbye\n"],"List capture");
 is($/,"\n","IFS intact");
 
+my $no_output;
+eval {
+	$no_output = capture(NO_SUCH_CMD,1);
+};
+
+like($@,qr/failed to start/, "failed capture");
+is($no_output,undef, "No output from failed command");

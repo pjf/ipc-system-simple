@@ -58,4 +58,5 @@ Revision history for Perl extension IPC::System::Simple.
 	  under Win32.
 	- Documented $ENV{PATH} foibles on Win32 systems under
 	  the Windows-specific notes section of the documentation.
-
+	- Implemented capture(), which is the equivalent
+	  of run() for backticks.

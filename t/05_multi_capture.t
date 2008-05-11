@@ -1,12 +1,12 @@
 #!/usr/bin/perl -w
 use strict;
-use Test::More skip_all => "Unimplemented";
 use Config;
+use Test::More;
 
 if ($^O eq "MSWin32") {
-        plan skip_all => "Multi-arg pipes not supported under Win32";
+	plan skip_all => "Multi-arg pipes not supported under Win32";
 } else {
-        plan tests => 8;
+	plan tests => 9;
 }
 
 # We want to invoke our sub-commands using Perl.
@@ -21,13 +21,16 @@ if ($^O ne 'VMS') {
 use_ok("IPC::System::Simple","capture");
 chdir("t");
 
+# The tests below for $/ are left in, even though IPC::System::Simple
+# never touches $/
+
 # Scalar capture
 
 my $output = capture($perl_path,"output.pl",0);
 ok(1);
 
 is($output,"Hello\nGoodbye\n","Scalar capture");
-is($/,"\n","IFS intact");
+is($/,"\n",'$/ intact');
 
 # List capture
 
@@ -35,15 +38,14 @@ my @output = capture($perl_path,"output.pl",0);
 ok(1);
 
 is_deeply(\@output,["Hello\n", "Goodbye\n"],"List capture");
-is($/,"\n","IFS intact");
+is($/,"\n",'$/ intact');
 
-# Void context exception.
+# List capture with odd $/
 
-TODO: {
-	local $TODO = "Unimplemented";
-	eval {
-		capture($perl_path,"output.pl",0);
-	};
+$/ = "e";
+my @odd_output = capture($perl_path,"output.pl",0);
+ok(1);
 
-	ok($@);
-}
+is_deeply(\@odd_output,["He","llo\nGoodbye","\n"], 'Odd $/ capture');
+
+
