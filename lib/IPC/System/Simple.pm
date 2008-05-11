@@ -81,18 +81,55 @@ sub run {
 	if (WINDOWS and @args) {
 		our $EXITVAL = -1;
 		my $pid;
-		my $success = Win32::Process::Create(
-			$pid,$command,"$command @args",1,NORMAL_PRIORITY_CLASS,"."
-		);
-		if (not $success) {
+
+		# Using $flags in our anonymous sub below helps
+		# avoid some compile-time hitches on non-Win32
+		# systems.
+		
+		my $flags = NORMAL_PRIORITY_CLASS;
+
+		# $spawn allows us to spawn a win32 process without
+		# retyping all the awkward syntax each time.
+
+		my $spawn = sub {
+			return Win32::Process::Create(
+				$pid, @_[0,1], 1, $flags, "."
+			)
+		};
+
+		LAUNCH: {
+			$spawn->($command, "$command @args") and last LAUNCH;
+
+			# We may have failed simply because we haven't
+			# got a full path to our executable.
+			# Let's go looking for it.
+
+			my @path = split(/;/,$ENV{PATH});
+
+			foreach my $dir (@path) {
+				my $fullpath = "$dir\\$command";
+				if (-x $fullpath) {
+
+					# TODO: This currently tries
+					# to find other executables on
+					# failure.  Should we give-up
+					# on our first failure?
+
+					$spawn->($fullpath,"$command @args")
+						and last LAUNCH;
+
+				}
+			}
+
+			# If we're here, then we couldn't launch our
+			# process, even if we tried to walk the path.
+
 			croak sprintf(
 				q{"%s" failed to start: "%s"},
 				$command, $^E
 			);
 		}
 
-		# TODO: If we failed to start, it may just be in our
-		#       PATH.  Traverse and check!
 
 		$pid->Wait(INFINITE);	# Wait for process exit.
 		$pid->GetExitCode($EXITVAL);
@@ -368,7 +405,7 @@ Paul Fenwick E<lt>pjf@cpan.orgE<gt>
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (C) 2006-2007 by Paul Fenwick
+Copyright (C) 2006-2008 by Paul Fenwick
 
 This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself, either Perl version 5.8.7 or,
