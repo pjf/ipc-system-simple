@@ -12,7 +12,7 @@ if ($^O ne 'VMS') {
 		unless $perl_path =~ m/$Config{_exe}$/i;
 }
 
-use IPC::System::Simple qw(run EXIT_ALL);
+use IPC::System::Simple qw(run EXIT_ANY);
 chdir("t");	# Ignore return, since we may already be in t/
 
 run($perl_path,"exiter.pl",0);
@@ -52,5 +52,5 @@ ok(1,"Explicit allow of exit status 1");
 run([-1], "$perl_path exiter.pl 5");
 ok(1,"Exit-all emulation via [-1] allowed");
 
-run(EXIT_ALL, "$perl_path exiter.pl 5");
-ok(1,"Exit-all via EXIT_ALL constant");
+run(EXIT_ANY, "$perl_path exiter.pl 5");
+ok(1,"Exit-all via EXIT_ANY constant");

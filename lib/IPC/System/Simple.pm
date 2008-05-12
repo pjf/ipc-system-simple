@@ -20,12 +20,12 @@ use constant FAIL_START => q{"%s" failed to start: "%s"};
 # be tainted.
 use constant ASSUME_TAINTED => ($] < 5.008);
 
-use constant EXIT_ALL_CONST => -1;			# Used internally
-use constant EXIT_ALL       => [ EXIT_ALL_CONST ];	# Exported
+use constant EXIT_ANY_CONST => -1;			# Used internally
+use constant EXIT_ANY       => [ EXIT_ANY_CONST ];	# Exported
 
 require Exporter;
 our @ISA = qw(Exporter);
-our @EXPORT_OK = qw( capture run $EXITVAL EXIT_ALL );
+our @EXPORT_OK = qw( capture run $EXITVAL EXIT_ANY );
 our $VERSION = '0.09';
 our $EXITVAL = -1;
 
@@ -320,9 +320,9 @@ sub _process_child_error {
 sub _check_exit {
 	my ($command, $exitval, $valid_returns) = @_;
 
-	# If we have a single-value list consisting of the EXIT_ALL
+	# If we have a single-value list consisting of the EXIT_ANY
 	# value, then we're happy with whatever exit value we're given.
-	if (@$valid_returns == 1 and $valid_returns->[0] == EXIT_ALL_CONST) {
+	if (@$valid_returns == 1 and $valid_returns->[0] == EXIT_ANY_CONST) {
 		return $exitval;
 	}
 
@@ -368,7 +368,7 @@ IPC::System::Simple - Call system() commands with a minimum of fuss
 
 =head1 SYNOPSIS
 
-  use IPC::System::Simple qw(capture run $EXITVAL EXIT_ALL);
+  use IPC::System::Simple qw(capture run $EXITVAL EXIT_ANY);
 
   # Run a command, throwing exception on failure
 
@@ -481,14 +481,14 @@ an exception if a non-zero exit value is returned.
 
 You may specify a range of values which are considered acceptable exit
 values by passing an I<array reference> as the first argument.  The
-special constant C<EXIT_ALL> can be used to allow I<any> exit value
+special constant C<EXIT_ANY> can be used to allow I<any> exit value
 to be returned.
 
-	use IPC::System::Simple qw(run capture EXIT_ALL);
+	use IPC::System::Simple qw(run capture EXIT_ANY);
 
 	run( [0..5], "cat *.txt");                   # Exit values 0-5 are OK
 
-	my @lines = capture( EXIT_ALL, "cat *.txt"); # Any exit is fine.
+	my @lines = capture( EXIT_ANY, "cat *.txt"); # Any exit is fine.
 
 The C<run> subroutine returns the exit value of the process:
 
@@ -540,14 +540,16 @@ number used.
 
 =over 4
 
-=item IPC::System::Simple::run called with no arguments
+=item IPC::System::Simple::%s called with no arguments
 
-You attempted to call C<run> but did not provide any arguments at all.
+You attempted to call C<run> or C<capture> but did not provide any
+arguments at all.  At the very lease you need to supply a command
+to run.
 
-=item IPC::System::Simple::run called with no command
+=item IPC::System::Simple::%s called with no command
 
-You called C<run> with a list of acceptable exit values, but no
-actual command.
+You called C<run> or C<capture> with a list of acceptable exit values,
+but no actual command.
 
 =item IPC::System::Simple::run called with tainted argument '%s'
 
