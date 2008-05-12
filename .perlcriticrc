@@ -1,0 +1,4 @@
+severity = 4
+verbose = 8
+# verbose = %d
+exclude = ValuesAndExpressions::ProhibitConstantPragma Subroutines::RequireArgUnpacking
