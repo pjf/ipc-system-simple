@@ -422,7 +422,7 @@ IPC::System::Simple - Call system() commands with a minimum of fuss
 
   my $exit_value = run(EXIT_ANY, "some_command", @args);
 
-  # Run a command, capture output into $result and throw exception on failure
+  # Capture output into $result and throw exception on failure
 
   my $result = capture("some_command");	
 
@@ -430,7 +430,8 @@ IPC::System::Simple - Call system() commands with a minimum of fuss
 
   print "some_command exited with status $EXITVAL\n";
 
-  my @lines = capture("some_command"); # Captures into @lines, splitting on $/
+  # Captures into @lines, splitting on $/
+  my @lines = capture("some_command"); 
 
   # Run a command which must return 0..5, capture the output into
   # @lines, and avoid the shell.
@@ -452,8 +453,8 @@ Perl's built-in C<system>:
 
 	use IPC::System::Simple qw(run);
 
-	run("cat *.txt");		# Execute command via the shell
-	run("cat","/etc/motd");		# Execute command without shell
+	run("cat *.txt");	# Execute command via the shell
+	run("cat","/etc/motd");	# Execute command without shell
 
 =head2 capture
 
@@ -529,7 +530,7 @@ to be returned.
 
 	use IPC::System::Simple qw(run capture EXIT_ANY);
 
-	run( [0..5], "cat *.txt");                   # Exit values 0-5 are OK
+	run( [0..5], "cat *.txt");             # Exit values 0-5 are OK
 
 	my @lines = capture( EXIT_ANY, "cat *.txt"); # Any exit is fine.
 
