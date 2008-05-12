@@ -66,3 +66,5 @@ Revision history for Perl extension IPC::System::Simple.
 	  indicate that any exit value is acceptable from a process.
 	- Added author-only Perl::Critic tests.
 	- Updated diagnostics section in POD.
+	- License changed to that of Perl 5.6.0, or any later version.
+	- LICENSE file added to distribution.

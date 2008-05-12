@@ -315,7 +315,7 @@ sub _process_child_error {
 
 	} 
 
-	croak sprintf(FAIL_INTERNAL, qq{'$command' ran without exit value or signal};
+	croak sprintf(FAIL_INTERNAL, qq{'$command' ran without exit value or signal});
 
 }
 
@@ -658,7 +658,7 @@ Paul Fenwick E<lt>pjf@cpan.orgE<gt>
 Copyright (C) 2006-2008 by Paul Fenwick
 
 This library is free software; you can redistribute it and/or modify
-it under the same terms as Perl itself, either Perl version 5.8.7 or,
+it under the same terms as Perl itself, either Perl version 5.6.0 or,
 at your option, any later version of Perl 5 you may have available.
 
 =cut

@@ -1,6 +1,7 @@
 Changes
 Makefile.PL
 MANIFEST
+LICENSE
 README
 lib/IPC/System/Simple.pm
 t/01_load.t
