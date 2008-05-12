@@ -418,6 +418,10 @@ IPC::System::Simple - Call system() commands with a minimum of fuss
 
   my $exit_value = run([0..5], "some_command", @args);
 
+  # The same, but any exit value will do.
+
+  my $exit_value = run(EXIT_ANY, "some_command", @args);
+
   # Run a command, capture output into $result and throw exception on failure
 
   my $result = capture("some_command");	
@@ -458,12 +462,14 @@ the same semantics as Perl's built-in backticks (and C<qx()>):
 
 	use IPC::System::Simple qw(capture);
 
+	# Capture text while invoking the shell.
 	my $file  = capture("cat /etc/motd");
 	my @lines = capture("cat /etc/passwd");
 
 However unlike regular backticks, which always use the shell, C<capture>
 will bypass the shell when called with multiple arguments:
 
+	# Capture text while avoiding the shell.
 	my $file  = capture("cat", "/etc/motd");
 	my @lines = capture("cat", "/etc/passwd");
 
@@ -560,14 +566,16 @@ previous versions of C<IPC::System::Simple> and from Perl's
 in-build C<system()> function, which can only handle 8-bit return values.
 
 The C<capture> subroutine always returns the 16-bit exit value under
-Windows.
+Windows.  The C<capture> subroutine also never uses the shell,
+even when passed a single argument.
 
 Versions of C<IPC::System::Simple> before v0.09 would not search
 the C<PATH> environment variable when the multi-argument form of
 C<run()> was called.  Versions from v0.09 onwards correctly search
 the path provided the command is provided including the extension
 (eg, C<notepad.exe> rather than just C<notepad>, or C<gvim.bat> rather
-than just C<gvim>).
+than just C<gvim>).  If no extension is provided, C<.exe> is
+assumed.
 
 Signals are not supported on Windows systems.  Sending a signal
 to a Windows process will usually cause it to exit with the signal
