@@ -14,7 +14,12 @@ use if WINDOWS, 'Win32::Process', qw(INFINITE NORMAL_PRIORITY_CLASS);
 use if WINDOWS, 'File::Spec';
 use POSIX qw(WIFEXITED WEXITSTATUS WIFSIGNALED WTERMSIG);
 
-use constant FAIL_START => q{"%s" failed to start: "%s"};
+use constant FAIL_START     => q{"%s" failed to start: "%s"};
+use constant FAIL_PLUMBING  => q{Error in IPC::System::Simple plumbing: "%s" - "%s"};
+use constant FAIL_CMD_BLANK => q{Entirely blank command passed: "%s"};
+use constant FAIL_INTERNAL  => q{Internal error in IPC::System::Simple: "%s"};
+use constant FAIL_TAINT     => q{IPC::System::Simple::%s called with tainted argument '%s'};
+use constant FAIL_TAINT_ENV => q{IPC::System::Simple::%s called with tainted environment $ENV{%s}};
 
 # On Perl's older than 5.8.x we can't assume that there'll be a
 # $^{TAINT} for us to check, so we assume that our args may always
@@ -114,17 +119,15 @@ sub capture {
 		# backticks.
 
 		# We start by dup'ing STDOUT.
-		# XXX - Fix our diagnostics.
 
 		open(my $saved_stdout, '>&', \*STDOUT)  ## no critic
-			or die "Internal error: Can't dup STDOUT";
+			or croak sprintf(FAIL_PLUMBING, "Can't dup STDOUT", $!);
 
 		# We now open up a pipe that will allow us to	
 		# communicate with the new process.
 
-		# XXX - Fix our diagnostics.
 		pipe(my ($read_fh, $write_fh))
-			or die "Internal error: Can't open pipe";
+			or croak sprintf(FAIL_PLUMBING, "Can't create pipe", $!);
 
 		# Allow CRLF sequences to become "\n", since
 		# this is what Perl backticks do.
@@ -132,29 +135,30 @@ sub capture {
 		binmode($read_fh, ':crlf');
 
 		# Now we re-open our STDOUT to $write_fh...
-		# XXX - Check for error
-		open(STDOUT, '>&', $write_fh);  ## no critic
+
+		open(STDOUT, '>&', $write_fh)  ## no critic
+			or croak sprintf(FAIL_PLUMBING, "Can't redirect STDOUT", $!);
 
 		# And now we spawn our new process with inherited
 		# filehandles.
 
-		# XXX - Format diagnostics properly.
-
 		my $exe = @args                      ? $command :
 			  $command =~ m{^"([^"]+)"}x ? $1       :
 			  $command =~ m{(\S+)     }x ? $1       :
-			  croak("Cannot find command in $command");
+			  croak sprintf(FAIL_CMD_BLANK, $command);
 
 		my $pid = _spawn_or_die($exe, "$command @args");
 
 		# Now restore our STDOUT.
 		open(STDOUT, '>&', $saved_stdout)  ## no critic
-			or die "Internal error: Can't restore STDOUT";
+			or croak sprintf(FAIL_PLUMBING,"Can't restore STDOUT", $!);
 
 		# Clean-up the filehandles we no longer need...
 
-		close($write_fh);
-		close($saved_stdout);
+		close($write_fh)
+			or croak sprintf(FAIL_PLUMBING,q{Can't close write end of pipe}, $!);
+		close($saved_stdout)
+			or croak sprintf(FAIL_PLUMBING,q{Can't close saved STDOUT}, $!);
 
 		# Read the data from our child...
 
@@ -174,10 +178,6 @@ sub capture {
 		_check_exit($command,$EXITVAL,$valid_returns);
 
 		return $wantarray ? @results : $result;
-	}
-
-	if (WINDOWS and @args) {
-		croak "capture under Win32 unimplemented";
 	}
 
 	# We'll produce our own warnings on failure to execute.
@@ -223,7 +223,6 @@ sub capture {
 # Tries really hard to spawn a process under Windows.  Returns
 # the pid on success, or undef on error.
 
-
 sub _spawn_or_die {
 
 	# We need to wrap practically the entire sub in an
@@ -233,7 +232,7 @@ sub _spawn_or_die {
 	# the NORMAL_PRIORITY_CLASS constant.
 
 	if (not WINDOWS) {
-		croak("Internal IPC::System:Simple error: _spawn_or_die called when not under Win32");
+		croak sprintf(FAIL_INTERNAL, "_spawn_or_die called when not under Win32");
 	} else {
 		my ($orig_exe, $cmdline) = @_;
 		my $pid;
@@ -274,14 +273,15 @@ sub _spawn_or_die {
 
 sub _check_taint {
 	return if not (ASSUME_TAINTED or ${^TAINT});
+	my $caller = (caller(1))[3];
 	foreach my $var (@_) {
 		if (tainted $var) {
-			croak qq{IPC::System::Simple::run called with tainted argument '$var'};
+			croak sprintf(FAIL_TAINT, $caller, $var);
 		}
 	}
 	foreach my $var (@Check_tainted_env) {
 		if (tainted $ENV{$var} ) {
-			croak qq{IPC::System::Simple::run called with tainted environment \$ENV{$var}};
+			croak sprintf(FAIL_TAINT_ENV, $caller, $var);
 		}
 	}
 
@@ -315,7 +315,7 @@ sub _process_child_error {
 
 	} 
 
-	croak qq{Internal error in IPC::System::Simple - "$command" ran without exit value or signal};
+	croak sprintf(FAIL_INTERNAL, qq{'$command' ran without exit value or signal};
 
 }
 
@@ -590,12 +590,22 @@ The command was killed by a signal.  The name of the signal
 will be reported, or C<UNKNOWN> if it cannot be determined.  The
 signal number is always reported.
 
-=item Internal error in IPC::System::Simple - "%s" ran without exit value or signal
+=item Error in IPC::System::Simple plumbing: "%s" - "%s"
 
-You've found a bug in C<IPC::System::Simple>.  It knows your command
-ran successfully, but doesn't know how or why it stopped.  Please
-report this error using the submission mechanism described in
-BUGS below.
+Implementing the C<capture()> command under Windows involves
+dark and terrible magicks involving pipes, and one of them
+has sprung a leak.  This could be due to a lack of file
+descriptors, although there are other possibilities.
+
+If you are able to reproduce this error, you are encouraged
+to submit a bug report according to the L</Reporting bugs> section below.
+
+=item Internal error in IPC::System::Simple: "%s"
+
+You've found a bug in C<IPC::System::Simple>.  Please check to
+see if an updated version of C<IPC::System::Simple> is available.
+If not, please file a bug report according to the L</Reporting bugs> section
+below.
 
 =back
 
@@ -620,11 +630,23 @@ arguments under Windows, but only 8-bit values are returned when
 C<run()> is called with a single value.  We should always return 16-bit
 value on systems that support them.
 
-Please report bugs to L<http://rt.cpan.org/Public/Dist/Display.html?Name=IPC-System-Simple> .
+=head2 Reporting bugs
+
+Before reporting a bug, please check to ensure you are using the
+most recent version of C<IPC::System::Simple>.  Your problem may
+have already been fixed in a new release.
+
+You can find the C<IPC::System::Simple> bug-tracker at
+L<http://rt.cpan.org/Public/Dist/Display.html?Name=IPC-System-Simple> .
+Please check to see if your bug has already been reported; if
+in doubt, report yours anyway.
+
+Submitting a patch and/or failing test case will greatly expediate
+the fixing of bugs.
 
 =head1 SEE ALSO
 
-L<POSIX> L<IPC::Run::Simple> L<perlipc> L<perlport> L<IPC::Run>
+L<POSIX>, L<IPC::Run::Simple>, L<perlipc>, L<perlport>, L<IPC::Run>,
 L<Win32::Process>
 
 =head1 AUTHOR
