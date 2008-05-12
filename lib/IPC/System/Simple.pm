@@ -12,6 +12,11 @@ use constant WINDOWS => ($^O eq 'MSWin32');
 use constant VMS     => ($^O eq 'VMS');
 use if WINDOWS, 'Win32::Process', qw(INFINITE NORMAL_PRIORITY_CLASS);
 use if WINDOWS, 'File::Spec';
+
+# Note that we don't use WIFSTOPPED because perl never uses
+# the WUNTRACED flag, and hence will never return early from
+# system() if the child processes is suspended with a SIGSTOP.
+
 use POSIX qw(WIFEXITED WEXITSTATUS WIFSIGNALED WTERMSIG);
 
 use constant FAIL_START     => q{"%s" failed to start: "%s"};
@@ -20,6 +25,9 @@ use constant FAIL_CMD_BLANK => q{Entirely blank command passed: "%s"};
 use constant FAIL_INTERNAL  => q{Internal error in IPC::System::Simple: "%s"};
 use constant FAIL_TAINT     => q{IPC::System::Simple::%s called with tainted argument '%s'};
 use constant FAIL_TAINT_ENV => q{IPC::System::Simple::%s called with tainted environment $ENV{%s}};
+use constant FAIL_SIGNAL    => q{"%s" died to signal "%s" (%d)%s};
+
+use constant FAIL_POSIX     => q{IPC::System::Simple does not understand the POSIX error '%s'.  Please check http://search.cpan.org/perldoc?IPC::System::Simple to see if there is an updated version.  If not please report this as a bug to http://rt.cpan.org/Public/Bug/Report.html?Queue=IPC-System-Simple};
 
 # On Perl's older than 5.8.x we can't assume that there'll be a
 # $^{TAINT} for us to check, so we assume that our args may always
@@ -28,6 +36,8 @@ use constant ASSUME_TAINTED => ($] < 5.008);
 
 use constant EXIT_ANY_CONST => -1;			# Used internally
 use constant EXIT_ANY       => [ EXIT_ANY_CONST ];	# Exported
+
+use constant UNDEFINED_POSIX_RE => qr{not (?:defined|a valid) POSIX macro};
 
 require Exporter;
 our @ISA = qw(Exporter);
@@ -53,17 +63,31 @@ if (VMS) {
 
 eval { WIFEXITED(0); };
 
-if ($@ =~ /not (?:defined|a valid) POSIX macro/) {
+if ($@ =~ UNDEFINED_POSIX_RE) {
 	*WIFEXITED   = sub { not $_[0] & 0xff };
 	*WEXITSTATUS = sub { $_[0] >> 8  };
 	*WIFSIGNALED = sub { $_[0] & 127 };
 	*WTERMSIG    = sub { $_[0] & 127 };
 } elsif ($@) {
-	croak "IPC::System::Simple does not understand the POSIX error '$@'.  Please check http://search.cpan.org/perldoc?IPC::System::Simple to see if there is an updated version.  If not please report this as a bug to http://rt.cpan.org/Public/Bug/Report.html?Queue=IPC-System-Simple";
+	croak sprintf FAIL_POSIX, $@;
 }
 
-# TODO - This doesn't look for core-dumps yet.
-# TODO - WTF is a WIFSTOPPED and how can it hurt us?
+# None of the POSIX modules I've found define WCOREDUMP, although
+# many systems define it.  Check the POSIX module on the hope that
+# it may actually be there.
+
+eval { POSIX::WCOREDUMP(1); };
+
+if ($@ =~ UNDEFINED_POSIX_RE) {
+	*WCOREDUMP = sub { $_[0] & 128 };
+} elsif ($@) {
+	croak sprintf FAIL_POSIX, $@;
+} else {
+	# POSIX actually has it defined!  Huzzah!
+	*WCOREDUMP = \&POSIX::WCOREDUMP;
+}
+
+# run is our way of running a process with system() semantics
 
 sub run {
 
@@ -97,6 +121,8 @@ sub run {
 
 	return _process_child_error($?,$command,$valid_returns);
 }
+
+# capture is our way of running a process with backticks/qx semantics
 
 sub capture {
 	_check_taint(@_);
@@ -299,6 +325,8 @@ sub _process_child_error {
 	
 	$EXITVAL = -1;
 
+	my $coredump = WCOREDUMP($child_error);
+
 	if ($child_error == -1) {
 		croak sprintf(FAIL_START, $command, $!);
 
@@ -311,7 +339,8 @@ sub _process_child_error {
 		my $signal_no   = WTERMSIG( $child_error );
 		my $signal_name = $Signal_from_number[$signal_no] || "UNKNOWN";
 
-		croak qq{"$command" died to signal "$signal_name" ($signal_no)};
+		croak sprintf FAIL_SIGNAL, $command, $signal_name, $signal_no, ($coredump ? " and dumped core" : "");
+
 
 	} 
 

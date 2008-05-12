@@ -3,10 +3,13 @@ use strict;
 use Test::More;
 use Config;
 
+use constant SIGKILL => 9;
+use constant SIGABRT => 6;
+
 if ($^O eq "MSWin32") {
 	plan skip_all => "Signals not implemented on Win32";
 } else {
-	plan tests => 3;
+	plan tests => 5;
 }
 
 # We want to invoke our sub-commands using Perl.
@@ -26,7 +29,13 @@ run([1],$perl_path,"signaler.pl",0);
 ok(1);
 
 eval {
-	run([1],$perl_path,"signaler.pl",9);	# SIGKILL on most systems.
+	run([1],$perl_path,"signaler.pl",SIGKILL);
 };
 
 like($@, qr/died to signal/);
+
+eval {
+	run([1],$perl_path,"signaler.pl",SIGABRT);
+};
+like($@, qr/died to signal/);
+like($@, qr/dumped core/);

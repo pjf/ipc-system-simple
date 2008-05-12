@@ -68,3 +68,5 @@ Revision history for Perl extension IPC::System::Simple.
 	- Updated diagnostics section in POD.
 	- License changed to that of Perl 5.6.0, or any later version.
 	- LICENSE file added to distribution.
+	- Moved to Module::Install for build system.
+	- Better failures when seeing unexpected things from POSIX.pm

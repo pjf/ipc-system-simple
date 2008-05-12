@@ -1,8 +1,17 @@
 Changes
-Makefile.PL
-MANIFEST
 LICENSE
+MANIFEST
+META.yml			Module meta-data (added by MakeMaker)
+Makefile.PL
 README
+inc/Module/Install.pm
+inc/Module/Install/Base.pm
+inc/Module/Install/Can.pm
+inc/Module/Install/Fetch.pm
+inc/Module/Install/Makefile.pm
+inc/Module/Install/Metadata.pm
+inc/Module/Install/Win32.pm
+inc/Module/Install/WriteAll.pm
 lib/IPC/System/Simple.pm
 t/01_load.t
 t/02_exit.t
@@ -20,4 +29,3 @@ t/pod.t
 t/pod_coverage.t
 t/signaler.pl
 t/win32.t
-META.yml                                 Module meta-data (added by MakeMaker)
