@@ -70,3 +70,8 @@ Revision history for Perl extension IPC::System::Simple.
 	- LICENSE file added to distribution.
 	- Moved to Module::Install for build system.
 	- Better failures when seeing unexpected things from POSIX.pm
+	- Support for detecting core-dumps added.
+	- All failure messages now use double-quotes when quoting
+	  variable sections.
+	- Diagnostics documentation rearraged to have most common
+	  errors listed first.

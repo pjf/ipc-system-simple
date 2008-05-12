@@ -23,9 +23,11 @@ use constant FAIL_START     => q{"%s" failed to start: "%s"};
 use constant FAIL_PLUMBING  => q{Error in IPC::System::Simple plumbing: "%s" - "%s"};
 use constant FAIL_CMD_BLANK => q{Entirely blank command passed: "%s"};
 use constant FAIL_INTERNAL  => q{Internal error in IPC::System::Simple: "%s"};
-use constant FAIL_TAINT     => q{IPC::System::Simple::%s called with tainted argument '%s'};
+use constant FAIL_TAINT     => q{IPC::System::Simple::%s called with tainted argument "%s"};
 use constant FAIL_TAINT_ENV => q{IPC::System::Simple::%s called with tainted environment $ENV{%s}};
 use constant FAIL_SIGNAL    => q{"%s" died to signal "%s" (%d)%s};
+use constnat FAIL_BADEXIT   => q{"%s" unexpectedly returned exit value %d};
+
 
 use constant FAIL_POSIX     => q{IPC::System::Simple does not understand the POSIX error '%s'.  Please check http://search.cpan.org/perldoc?IPC::System::Simple to see if there is an updated version.  If not please report this as a bug to http://rt.cpan.org/Public/Bug/Report.html?Queue=IPC-System-Simple};
 
@@ -362,7 +364,7 @@ sub _check_exit {
 	}
 
 	if (not defined first { $_ == $exitval } @$valid_returns) {
-		croak qq{"$command" unexpectedly returned exit value $exitval};
+		croak sprintf FAIL_BADEXIT, $command, $exitval;
 	}	
 	return $exitval;
 }
@@ -575,6 +577,25 @@ number used.
 
 =over 4
 
+=item "%s" failed to start: "%s"
+
+The command specified did not even start.  It may not exist, or
+you may not have permission to use it.  The reason it could not
+start (as determined from C<$!>) will be provided.
+
+=item "%s" unexpectedly returned exit value %d
+
+The command ran successfully, but returned an exit value we did
+not expect.  The value returned is reported.
+
+=item "%s" died to signal "%s" (%d) %s
+
+The command was killed by a signal.  The name of the signal
+will be reported, or C<UNKNOWN> if it cannot be determined.  The
+signal number is always reported.  If we detected that the
+process dumped core, then the string C<and dumped core> is
+appeneded.
+
 =item IPC::System::Simple::%s called with no arguments
 
 You attempted to call C<run> or C<capture> but did not provide any
@@ -586,7 +607,7 @@ to run.
 You called C<run> or C<capture> with a list of acceptable exit values,
 but no actual command.
 
-=item IPC::System::Simple::run called with tainted argument '%s'
+=item IPC::System::Simple::run called with tainted argument "%s"
 
 You called C<run> with tainted (untrusted) arguments, which is almost
 certainly a bad idea.  To untaint your arguments you'll need to
@@ -601,23 +622,6 @@ You called C<run> but part of your environment was tainted
 variable before calling C<run>, or set it to an untainted value
 (usually one set inside your program).  See
 L<perlsec/Cleaning Up Your Path> for more information.
-
-=item "%s" failed to start: "%s"
-
-The command specified did not even start.  It may not exist, or
-you may not have permission to use it.  The reason it could not
-start (as determined from C<$!>) will be provided.
-
-=item "%s" unexpectedly returned exit value %d
-
-The command ran successfully, but returned an exit value we did
-not expect.  The value returned is reported.
-
-=item "%s" died to signal "%s" (%d)
-
-The command was killed by a signal.  The name of the signal
-will be reported, or C<UNKNOWN> if it cannot be determined.  The
-signal number is always reported.
 
 =item Error in IPC::System::Simple plumbing: "%s" - "%s"
 
@@ -648,9 +652,11 @@ There are no non-core dependencies on non-Win32 systems.
 
 =head1 BUGS
 
-Reporting of core-dumps is not yet implemented.
+Core dumps are only checked for when a process dies due to a
+signal.
 
-WIFSTOPPED status is not checked.
+C<WIFSTOPPED> status is not checked, as perl never spawns processes
+with the C<WUNTRACED> option.
 
 Signals are not supported under Win32 systems.
 
