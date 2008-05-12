@@ -20,9 +20,12 @@ use constant FAIL_START => q{"%s" failed to start: "%s"};
 # be tainted.
 use constant ASSUME_TAINTED => ($] < 5.008);
 
+use constant EXIT_ALL_CONST => -1;			# Used internally
+use constant EXIT_ALL       => [ EXIT_ALL_CONST ];	# Exported
+
 require Exporter;
 our @ISA = qw(Exporter);
-our @EXPORT_OK = qw( capture run $EXITVAL );
+our @EXPORT_OK = qw( capture run $EXITVAL EXIT_ALL );
 our $VERSION = '0.09';
 our $EXITVAL = -1;
 
@@ -315,7 +318,14 @@ sub _process_child_error {
 # for new features in I::S::S.
 
 sub _check_exit {
-	my ($command,$exitval, $valid_returns) = @_;
+	my ($command, $exitval, $valid_returns) = @_;
+
+	# If we have a single-value list consisting of the EXIT_ALL
+	# value, then we're happy with whatever exit value we're given.
+	if (@$valid_returns == 1 and $valid_returns->[0] == EXIT_ALL_CONST) {
+		return $exitval;
+	}
+
 	if (not defined first { $_ == $exitval } @$valid_returns) {
 		croak qq{"$command" unexpectedly returned exit value $exitval};
 	}	
@@ -358,7 +368,7 @@ IPC::System::Simple - Call system() commands with a minimum of fuss
 
 =head1 SYNOPSIS
 
-  use IPC::System::Simple qw(capture run $EXITVAL);
+  use IPC::System::Simple qw(capture run $EXITVAL EXIT_ALL);
 
   # Run a command, throwing exception on failure
 
@@ -470,11 +480,15 @@ non-zero status for failure.  C<IPC::System::Simple> will default to throwing
 an exception if a non-zero exit value is returned.
 
 You may specify a range of values which are considered acceptable exit
-values by passing an I<array reference> as the first argument:
+values by passing an I<array reference> as the first argument.  The
+special constant C<EXIT_ALL> can be used to allow I<any> exit value
+to be returned.
+
+	use IPC::System::Simple qw(run capture EXIT_ALL);
 
 	run( [0..5], "cat *.txt");                   # Exit values 0-5 are OK
 
-	my @lines = capture( [0..255], "cat *.txt"); # Any exit value is OK
+	my @lines = capture( EXIT_ALL, "cat *.txt"); # Any exit is fine.
 
 The C<run> subroutine returns the exit value of the process:
 
@@ -504,9 +518,12 @@ being terminated by a signal) or did not start.
 
 As of C<IPC::System::Simple> v0.06, the C<run> subroutine I<when
 called with multiple arguments> will make available the full 16-bit
-return value on Win32 systems.  This is different from the
+exit value on Win32 systems.  This is different from the
 previous versions of C<IPC::System::Simple> and from Perl's
 in-build C<system()> function, which can only handle 8-bit return values.
+
+The C<capture> subroutine always returns the 16-bit exit value under
+Windows.
 
 Versions of C<IPC::System::Simple> before v0.09 would not search
 the C<PATH> environment variable when the multi-argument form of

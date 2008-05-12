@@ -18,13 +18,16 @@ my ($perl_exe, $perl_dir) = fileparse($perl_path);
 
 plan tests => 5;
 
-use_ok("IPC::System::Simple","run");
+use IPC::System::Simple qw(run capture $EXITVAL);
 
 chdir("t");
 
-my $exit = run([1000], $perl_path, "exiter.pl",BIG_EXIT);
+my $exit = run([1000], $perl_path, "exiter.pl", BIG_EXIT);
 
 is($exit,BIG_EXIT,"16 bit exit value");
+
+my $capture = capture([1000], $perl_path, "exiter.pl", BIG_EXIT);
+is($EXITVAL,BIG_EXIT,"Capture uses 16 bit exit value");
 
 # Testing to ensure that our PATH gets respected...
 
