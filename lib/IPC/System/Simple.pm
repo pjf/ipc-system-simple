@@ -122,7 +122,7 @@ sub run {
 
 	# We're throwing our own exception on command not found, so
 	# we don't need a warning from Perl.
-	no warnings 'exec';
+	no warnings 'exec';		## no critic
 	system($command,@args);
 
 	return _process_child_error($?,$command,$valid_returns);
@@ -152,7 +152,7 @@ sub capture {
 		# XXX - Fix our diagnostics.
 		# XXX - Flush buffers first?
 
-		open(my $saved_stdout, '>&', \*STDOUT)
+		open(my $saved_stdout, '>&', \*STDOUT)  ## no critic
 			or die "Internal error: Can't dup STDOUT";
 
 		# We now open up a pipe that will allow us to	
@@ -169,7 +169,8 @@ sub capture {
 		binmode($read_fh, ':crlf');
 
 		# Now we re-open our STDOUT to $write_fh...
-		open(STDOUT, '>&', $write_fh);
+		# XXX - Check for error
+		open(STDOUT, '>&', $write_fh);  ## no critic
 
 		# And now we spawn our new process with inherited
 		# filehandles.
@@ -187,7 +188,7 @@ sub capture {
 		) or croak(sprintf FAIL_START,"$command",$^E);
 
 		# Now restore our STDOUT.
-		open(STDOUT, '>&', $saved_stdout)
+		open(STDOUT, '>&', $saved_stdout)  ## no critic
 			or die "Internal error: Can't restore STDOUT";
 
 		# Clean-up the filehandles we no longer need...
@@ -220,7 +221,7 @@ sub capture {
 	}
 
 	# We'll produce our own warnings on failure to execute.
-	no warnings 'exec';
+	no warnings 'exec';	## no critic
 
 	if (not @args) {
 		if ($wantarray) {
