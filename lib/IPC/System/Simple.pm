@@ -26,7 +26,7 @@ use constant FAIL_INTERNAL  => q{Internal error in IPC::System::Simple: "%s"};
 use constant FAIL_TAINT     => q{IPC::System::Simple::%s called with tainted argument "%s"};
 use constant FAIL_TAINT_ENV => q{IPC::System::Simple::%s called with tainted environment $ENV{%s}};
 use constant FAIL_SIGNAL    => q{"%s" died to signal "%s" (%d)%s};
-use constnat FAIL_BADEXIT   => q{"%s" unexpectedly returned exit value %d};
+use constant FAIL_BADEXIT   => q{"%s" unexpectedly returned exit value %d};
 
 
 use constant FAIL_POSIX     => q{IPC::System::Simple does not understand the POSIX error '%s'.  Please check http://search.cpan.org/perldoc?IPC::System::Simple to see if there is an updated version.  If not please report this as a bug to http://rt.cpan.org/Public/Bug/Report.html?Queue=IPC-System-Simple};
