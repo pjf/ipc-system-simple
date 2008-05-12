@@ -3,3 +3,4 @@ cover_db
 blib
 Makefile
 IPC-System-Simple-*.tar.gz
+META.yml
