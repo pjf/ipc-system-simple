@@ -4,12 +4,11 @@ use Test::More;
 use Config;
 
 use constant SIGKILL => 9;
-use constant SIGABRT => 6;
 
 if ($^O eq "MSWin32") {
 	plan skip_all => "Signals not implemented on Win32";
 } else {
-	plan tests => 5;
+	plan tests => 3;
 }
 
 # We want to invoke our sub-commands using Perl.
@@ -33,9 +32,3 @@ eval {
 };
 
 like($@, qr/died to signal/);
-
-eval {
-	run([1],$perl_path,"signaler.pl",SIGABRT);
-};
-like($@, qr/died to signal/);
-like($@, qr/dumped core/);
