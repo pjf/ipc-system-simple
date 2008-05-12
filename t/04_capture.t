@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 use strict;
-use Test::More tests => 9;
+use Test::More tests => 12;
 use Config;
 use constant NO_SUCH_CMD => "this_command_had_better_not_exist";
 
@@ -28,6 +28,9 @@ ok(1);
 is($output,"Hello\nGoodbye\n","Scalar capture");
 is($/,"\n","IFS intact");
 
+my $qx_output = qx($output_exe);
+is($output, $qx_output, "capture and qx() return same results");
+
 # List capture
 
 my @output = capture($output_exe);
@@ -43,3 +46,15 @@ eval {
 
 like($@,qr/failed to start/, "failed capture");
 is($no_output,undef, "No output from failed command");
+
+# The following is to try and catch weird buffering issues
+# as we move around filehandles inside capture().
+
+print "# buffer test string";	# NB, no trailing newline
+
+$output = capture($output_exe);
+
+print "\n";  # Terminates our test string above in TAP output
+
+like($output,qr{Hello},"Single-arg capture still works");
+unlike($output,qr{buffer test},"No unflushed data readback");

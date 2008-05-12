@@ -11,6 +11,7 @@ use Config;
 use constant WINDOWS => ($^O eq 'MSWin32');
 use constant VMS     => ($^O eq 'VMS');
 use if WINDOWS, 'Win32::Process', qw(INFINITE NORMAL_PRIORITY_CLASS);
+use if WINDOWS, 'File::Spec';
 use POSIX qw(WIFEXITED WEXITSTATUS WIFSIGNALED WTERMSIG);
 
 use constant FAIL_START => q{"%s" failed to start: "%s"};
@@ -73,47 +74,8 @@ sub run {
 
 	if (WINDOWS and @args) {
 		our $EXITVAL = -1;
-		my $pid;
 
-		# Using $flags in our anonymous sub below helps
-		# avoid some compile-time hitches on non-Win32
-		# systems.
-		
-		my $flags = NORMAL_PRIORITY_CLASS;
-
-		# $spawn allows us to spawn a win32 process without
-		# retyping all the awkward syntax each time.
-
-		my $spawn = sub {
-			return Win32::Process::Create(
-				$pid, @_[0,1], 1, $flags, "."
-			)
-		};
-
-		LAUNCH: {
-			$spawn->($command, "$command @args") and last LAUNCH;
-
-			# We may have failed simply because we haven't
-			# got a full path to our executable.
-			# Let's go looking for it.
-
-			my @path = split(/;/,$ENV{PATH});
-
-			foreach my $dir (@path) {
-				my $fullpath = "$dir\\$command";
-				if (-x $fullpath) {
-					$spawn->($fullpath,"$command @args")
-						and last LAUNCH;
-
-				}
-			}
-
-			# If we're here, then we couldn't launch our
-			# process, even if we tried to walk the path.
-
-			croak sprintf(FAIL_START, $command, $^E);
-		}
-
+		my $pid = _spawn_or_die($command, "$command @args");
 
 		$pid->Wait(INFINITE);	# Wait for process exit.
 		$pid->GetExitCode($EXITVAL);
@@ -153,7 +115,6 @@ sub capture {
 
 		# We start by dup'ing STDOUT.
 		# XXX - Fix our diagnostics.
-		# XXX - Flush buffers first?
 
 		open(my $saved_stdout, '>&', \*STDOUT)  ## no critic
 			or die "Internal error: Can't dup STDOUT";
@@ -166,8 +127,7 @@ sub capture {
 			or die "Internal error: Can't open pipe";
 
 		# Allow CRLF sequences to become "\n", since
-		# I believe this is what Perl backticks do.
-		# XXX - Is this a good idea?
+		# this is what Perl backticks do.
 
 		binmode($read_fh, ':crlf');
 
@@ -178,7 +138,6 @@ sub capture {
 		# And now we spawn our new process with inherited
 		# filehandles.
 
-		# XXX - Search PATH properly.
 		# XXX - Format diagnostics properly.
 
 		my $exe = @args                      ? $command :
@@ -186,9 +145,7 @@ sub capture {
 			  $command =~ m{(\S+)     }x ? $1       :
 			  croak("Cannot find command in $command");
 
-		Win32::Process::Create(
-			my $pid, $exe, "$command @args", 1, NORMAL_PRIORITY_CLASS, "."
-		) or croak(sprintf FAIL_START,"$command",$^E);
+		my $pid = _spawn_or_die($exe, "$command @args");
 
 		# Now restore our STDOUT.
 		open(STDOUT, '>&', $saved_stdout)  ## no critic
@@ -261,6 +218,55 @@ sub capture {
 	
 	return $results;
 
+}
+
+# Tries really hard to spawn a process under Windows.  Returns
+# the pid on success, or undef on error.
+
+
+sub _spawn_or_die {
+
+	# We need to wrap practically the entire sub in an
+	# if block to ensure it doesn't get compiled under non-Win32
+	# systems.  Compiling on this systems would not only be a
+	# waste of time, but also results in complaints about
+	# the NORMAL_PRIORITY_CLASS constant.
+
+	if (not WINDOWS) {
+		croak("Internal IPC::System:Simple error: _spawn_or_die called when not under Win32");
+	} else {
+		my ($orig_exe, $cmdline) = @_;
+		my $pid;
+
+		my $exe = $orig_exe;
+
+		# If our command doesn't have an extension, add one.
+		$exe .= $Config{_exe} if ($exe !~ m{\.});
+
+		Win32::Process::Create(
+			$pid, $exe, $cmdline, 1, NORMAL_PRIORITY_CLASS, "."
+		) and return $pid;
+
+		my @path = split(/;/,$ENV{PATH});
+
+		foreach my $dir (@path) {
+			my $fullpath = File::Spec->catfile($dir,$exe);
+
+			# We're using -x here on the assumption that stat()
+			# is faster than spawn, so trying to spawn a process
+			# for each path element will be unacceptably
+			# inefficient.
+
+			if (-x $fullpath) {
+				Win32::Process::Create(
+					$pid, $fullpath, $cmdline, 1,
+					NORMAL_PRIORITY_CLASS, "."
+				) and return $pid;
+			}
+		}
+
+		croak sprintf(FAIL_START, $orig_exe, $^E);
+	}
 }
 
 # Complain on tainted arguments or environment.

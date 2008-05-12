@@ -62,7 +62,7 @@ Revision history for Perl extension IPC::System::Simple.
 	  of run() for backticks.
 	- General documentation improvements and clarifications,
 	  thanks to Jacinta Richardson.
-	- The special value EXIT_ALL (aka [-1]) can be used to
+	- The special value EXIT_ANY (aka [-1]) can be used to
 	  indicate that any exit value is acceptable from a process.
 	- Added author-only Perl::Critic tests.
 	- Updated diagnostics section in POD.

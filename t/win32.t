@@ -16,7 +16,7 @@ $perl_path .= $Config{_exe} unless $perl_path =~ m/$Config{_exe}$/i;
 
 my ($perl_exe, $perl_dir) = fileparse($perl_path);
 
-plan tests => 5;
+plan tests => 10;
 
 use IPC::System::Simple qw(run capture $EXITVAL);
 
@@ -39,10 +39,24 @@ eval {
 
 like($@,qr/failed to start/,"No calling perl when not in path");
 
+eval {
+	capture($perl_exe,"-e1");
+};
+
+like($@, qr/failed to start/, "Capture can't find perl when not in path");
+
 $ENV{PATH} = $perl_dir;
 
 run($perl_exe,"-e1");
-ok(1,"perl found in path");
+ok(1,"run found perl in path");
+
+$capture = capture($perl_exe,"-v");
+ok(1,"capture found perl in path");
+like($capture, qr/Larry Wall/, "Capture text successful");
+
+$capture = capture("$perl_exe -v");
+ok(1,"capture found single-arg perl in path");
+like($capture, qr/Larry Wall/, "Single-arg Capture text successful");
 
 $ENV{PATH} = "$ENV{SystemRoot};$perl_dir;$ENV{SystemRoot}\\System32";
 
