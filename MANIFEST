@@ -27,6 +27,7 @@ t/exiter.pl
 t/internal.t
 t/kwalitee.t
 t/output.pl
+t/not_an_exe.txt
 t/pod.t
 t/pod_coverage.t
 t/signaler.pl

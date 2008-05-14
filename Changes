@@ -75,3 +75,7 @@ Revision history for Perl extension IPC::System::Simple.
 	  variable sections.
 	- Diagnostics documentation rearraged to have most common
 	  errors listed first.
+
+0.10
+	- Minor corrections to diagnostics documentation.
+	- Multi-arg captures now work on Perl 5.6.x.

@@ -3,8 +3,9 @@ use strict;
 use Config;
 use Test::More;
 use constant NO_SUCH_CMD => "this_command_had_better_not_exist_either";
+use constant NOT_AN_EXE  => "not_an_exe.txt";
 
-plan tests => 11;
+plan tests => 14;
 
 # We want to invoke our sub-commands using Perl.
 
@@ -55,3 +56,19 @@ eval {
 
 like($@,qr/failed to start/, "failed capture");
 is($no_output,undef, "No output from failed command");
+
+# Running Perl -v
+
+my $perl_output = capture($perl_path,"-v");
+like($perl_output, qr{Larry Wall}, "perl -v contains Larry");
+
+SKIP: {
+	skip('Author test.  Set $ENV{TEST_AUTHOR} to true to run', 2)
+		unless $ENV{TEST_AUTHOR};
+
+	eval { capture(NOT_AN_EXE,1); };
+
+	like($@, qr{Permission denied}, "Permission denied on non-exe" );
+	like($@, qr{failed to start}, "Non-exe failed to start" );
+
+}

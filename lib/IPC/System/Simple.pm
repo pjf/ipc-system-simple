@@ -44,7 +44,7 @@ use constant UNDEFINED_POSIX_RE => qr{not (?:defined|a valid) POSIX macro};
 require Exporter;
 our @ISA = qw(Exporter);
 our @EXPORT_OK = qw( capture run $EXITVAL EXIT_ANY );
-our $VERSION = '0.09';
+our $VERSION = '0.10';
 our $EXITVAL = -1;
 
 my @Signal_from_number = split(' ', $Config{sig_name});
@@ -226,12 +226,63 @@ sub capture {
 	# If we're here, we have arguments.  Avoid the shell using
 	# multi-arg open.
 
-	# NB: We don't check the return status on close(), since
-	# on failure it sets $?, which we then inspect for more
-	# useful information.
+	# We can't use a multi-arg piped open here, since 5.6.x
+	# doesn't like them.  Instead we emulate what 5.8.x does,
+	# which is to create a pipe(), set the close-on-exec flag
+	# on the child, and the fork/exec.  If the exec fails, the
+	# child writes to the pipe.  If the exec succeeds, then
+	# the pipe closes without data.
 
-	open(my $pipe, "-|", $command, @args)
-		or croak sprintf(FAIL_START, $command, $!);
+	pipe(my ($read_fh, $write_fh))
+		or croak sprintf(FAIL_PLUMBING, "Can't create pipe", $!);
+
+	# This next line also does an implicit fork.
+	my $pid = open(my $pipe, '-|');	 ## no critic
+
+	if (not defined $pid) {
+		croak sprintf(FAIL_START, $command, $!);
+	} elsif (not $pid) {
+		# Child process, execs command.
+
+		close($read_fh);
+
+		# TODO: 'no warnings exec' doesn't get rid
+		# of the 'unlikely to be reached' warnings.
+		# This is a bug in perl / perldiag / perllexwarn / warnings.
+
+		no warnings;   ## no critic
+
+		exec($command, @args);
+
+		# Oh no, exec fails!  Send the reason why to
+		# the parent.
+
+		print {$write_fh} int($!);
+		exit(-1);
+	}
+
+	{
+		# In parent process.
+
+		close($write_fh);
+
+		# Parent process, check for child error.
+		my $error = <$read_fh>;
+
+		# Tidy up our pipes.
+		close($read_fh);
+
+		# Check for error.
+		if ($error) {
+			# Setting $! to our child error number gives
+			# us nice looking strings when printed.
+			local $! = $error;
+			croak sprintf(FAIL_START, $command, $!);
+		}
+	}
+
+	# Parent process, we don't care about our pid, but we
+	# do go and read our pipe.
 
 	if ($wantarray) {
 		my @results = <$pipe>;
@@ -239,6 +290,10 @@ sub capture {
 		_process_child_error($?,$command,$valid_returns);
 		return @results;
 	}
+
+	# NB: We don't check the return status on close(), since
+	# on failure it sets $?, which we then inspect for more
+	# useful information.
 
 	my $results = join("",<$pipe>);
 	close($pipe);
@@ -616,7 +671,7 @@ to run.
 You called C<run> or C<capture> with a list of acceptable exit values,
 but no actual command.
 
-=item IPC::System::Simple::run called with tainted argument "%s"
+=item IPC::System::Simple::%s called with tainted argument "%s"
 
 You called C<run> with tainted (untrusted) arguments, which is almost
 certainly a bad idea.  To untaint your arguments you'll need to
@@ -624,7 +679,7 @@ pass your data through a regular expression and use the resulting
 match variables.  See L<perlsec/Laundering and Detecting Tainted Data>
 for more information.
 
-=item IPC::System::Simple::run called with tainted environment $ENV{%s}
+=item IPC::System::Simple::%s called with tainted environment $ENV{%s}
 
 You called C<run> but part of your environment was tainted
 (untrusted).  You should either delete the named environment
@@ -634,7 +689,7 @@ L<perlsec/Cleaning Up Your Path> for more information.
 
 =item Error in IPC::System::Simple plumbing: "%s" - "%s"
 
-Implementing the C<capture()> command under Windows involves
+Implementing the C<capture()> command under involves
 dark and terrible magicks involving pipes, and one of them
 has sprung a leak.  This could be due to a lack of file
 descriptors, although there are other possibilities.
