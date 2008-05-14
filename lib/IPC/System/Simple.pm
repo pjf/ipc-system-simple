@@ -456,7 +456,7 @@ __END__
 
 =head1 NAME
 
-IPC::System::Simple - Call system() commands with a minimum of fuss
+IPC::System::Simple - Run commands simply, with detailed diagnostics
 
 =head1 SYNOPSIS
 
@@ -746,7 +746,7 @@ the fixing of bugs.
 =head1 SEE ALSO
 
 L<POSIX>, L<IPC::Run::Simple>, L<perlipc>, L<perlport>, L<IPC::Run>,
-L<Win32::Process>
+L<IPC::Run3>, L<Win32::Process>
 
 =head1 AUTHOR
 

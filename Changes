@@ -77,5 +77,6 @@ Revision history for Perl extension IPC::System::Simple.
 	  errors listed first.
 
 0.10
+	- Multi-arg captures now work on Perl 5.6.x. (RT #35866)
 	- Minor corrections to diagnostics documentation.
-	- Multi-arg captures now work on Perl 5.6.x.
+	- Adjusted module summary.

@@ -63,6 +63,11 @@ my $perl_output = capture($perl_path,"-v");
 like($perl_output, qr{Larry Wall}, "perl -v contains Larry");
 
 SKIP: {
+
+	# Considering making this an author test that depends upon
+	# OS, since different systems will have different ideas
+	# about what's a non-executable file.
+
 	skip('Author test.  Set $ENV{TEST_AUTHOR} to true to run', 2)
 		unless $ENV{TEST_AUTHOR};
 
