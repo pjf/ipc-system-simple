@@ -64,9 +64,10 @@ like($perl_output, qr{Larry Wall}, "perl -v contains Larry");
 
 SKIP: {
 
-	# Considering making this an author test that depends upon
-	# OS, since different systems will have different ideas
-	# about what's a non-executable file.
+	# Considering making these tests depend upon the OS,
+	# as well as $ENV{AUTHOR_TEST}, since different systems
+	# will have different ways of expressing their displeasure
+	# at executing a file that's not executable.
 
 	skip('Author test.  Set $ENV{TEST_AUTHOR} to true to run', 2)
 		unless $ENV{TEST_AUTHOR};
@@ -74,7 +75,7 @@ SKIP: {
 	chmod(0,NOT_AN_EXE);
 	eval { capture(NOT_AN_EXE,1); };
 
-	like($@, qr{Permission denied|No such file}, "Permission denied on non-exe" );
+	like($@, qr{Permission denied|No such file|The system cannot find the file specified}, "Permission denied on non-exe" );
 	like($@, qr{failed to start}, "Non-exe failed to start" );
 
 }
