@@ -673,15 +673,14 @@ but no actual command.
 
 =item IPC::System::Simple::%s called with tainted argument "%s"
 
-You called C<run> with tainted (untrusted) arguments, which is almost
-certainly a bad idea.  To untaint your arguments you'll need to
-pass your data through a regular expression and use the resulting
-match variables.  See L<perlsec/Laundering and Detecting Tainted Data>
-for more information.
+You called C<run> or C<capture> with tainted (untrusted) arguments, which is
+almost certainly a bad idea.  To untaint your arguments you'll need to pass
+your data through a regular expression and use the resulting match variables.
+See L<perlsec/Laundering and Detecting Tainted Data> for more information.
 
 =item IPC::System::Simple::%s called with tainted environment $ENV{%s}
 
-You called C<run> but part of your environment was tainted
+You called C<run> or C<capture> but part of your environment was tainted
 (untrusted).  You should either delete the named environment
 variable before calling C<run>, or set it to an untainted value
 (usually one set inside your program).  See
@@ -689,10 +688,9 @@ L<perlsec/Cleaning Up Your Path> for more information.
 
 =item Error in IPC::System::Simple plumbing: "%s" - "%s"
 
-Implementing the C<capture()> command under involves
-dark and terrible magicks involving pipes, and one of them
-has sprung a leak.  This could be due to a lack of file
-descriptors, although there are other possibilities.
+Implementing the C<capture> command involves dark and terrible magicks
+involving pipes, and one of them has sprung a leak.  This could be due to a
+lack of file descriptors, although there are other possibilities.
 
 If you are able to reproduce this error, you are encouraged
 to submit a bug report according to the L</Reporting bugs> section below.
