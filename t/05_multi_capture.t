@@ -74,7 +74,7 @@ SKIP: {
 	chmod(0,NOT_AN_EXE);
 	eval { capture(NOT_AN_EXE,1); };
 
-	like($@, qr{Permission denied}, "Permission denied on non-exe" );
+	like($@, qr{Permission denied|No such file}, "Permission denied on non-exe" );
 	like($@, qr{failed to start}, "Non-exe failed to start" );
 
 }
