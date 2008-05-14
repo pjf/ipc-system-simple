@@ -66,6 +66,7 @@ SKIP: {
 	skip('Author test.  Set $ENV{TEST_AUTHOR} to true to run', 2)
 		unless $ENV{TEST_AUTHOR};
 
+	chmod(0,NOT_AN_EXE);
 	eval { capture(NOT_AN_EXE,1); };
 
 	like($@, qr{Permission denied}, "Permission denied on non-exe" );
