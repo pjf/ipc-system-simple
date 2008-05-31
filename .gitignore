@@ -1,6 +1,7 @@
 IPC-System-Simple-*.tar.gz
 META.yml
 Makefile
+Makefile.old
 blib
 cover_db
 inc
