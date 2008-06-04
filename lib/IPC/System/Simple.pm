@@ -43,7 +43,7 @@ use constant UNDEFINED_POSIX_RE => qr{not (?:defined|a valid) POSIX macro};
 
 require Exporter;
 our @ISA = qw(Exporter);
-our @EXPORT_OK = qw( capture run $EXITVAL EXIT_ANY );
+our @EXPORT_OK = qw( capture run $EXITVAL EXIT_ANY system );
 our $VERSION = '0.10';
 our $EXITVAL = -1;
 
@@ -89,6 +89,10 @@ if ($@ =~ UNDEFINED_POSIX_RE) {
 	*WCOREDUMP = \&POSIX::WCOREDUMP;
 }
 
+# system simply calls run
+
+*system = \&run;
+
 # run is our way of running a process with system() semantics
 
 sub run {
@@ -119,7 +123,7 @@ sub run {
 	# We're throwing our own exception on command not found, so
 	# we don't need a warning from Perl.
 	no warnings 'exec';		## no critic
-	system($command,@args);
+	CORE::system($command,@args);
 
 	return _process_child_error($?,$command,$valid_returns);
 }
