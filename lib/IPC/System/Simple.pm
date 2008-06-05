@@ -464,6 +464,26 @@ IPC::System::Simple - Run commands simply, with detailed diagnostics
 
 =head1 SYNOPSIS
 
+  use IPC::System::Simple qw(system capture);
+
+  system("some_command");   # Command succeeds or dies!
+
+  system("some_command",@args); # Succeeds or dies, avoids the shell.
+
+  # Run some_command, capturing its output, just like backticks.
+  # If the command fails, dies with an error.
+
+  my $output = capture("some_command");
+
+=head1 DESCRIPTION
+
+Calling Perl's in-built C<system()> function is easy, but checking
+the results can be hard.  C<IPC::System::Simple> aims to make
+life easy for the I<common cases> of calling C<system> and
+backticks (aka C<qx()>).
+
+=head1 ADVANCED SYNOPSIS
+
   use IPC::System::Simple qw(capture run $EXITVAL EXIT_ANY);
 
   # Run a command, throwing exception on failure
@@ -497,12 +517,7 @@ IPC::System::Simple - Run commands simply, with detailed diagnostics
 
   my @lines  = capture([0..5], "some_command", @args);
 
-=head1 DESCRIPTION
-
-Calling Perl's in-built C<system()> function is easy, but checking
-the results can be hard.  C<IPC::System::Simple> aims to make
-life easy for the I<common cases> of calling C<system> and
-backticks (aka C<qx()>).
+=head1 ADVNACED USAGE
 
 =head2 run
 
