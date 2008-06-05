@@ -731,18 +731,71 @@ and above.
 
 There are no non-core dependencies on non-Win32 systems.
 
+=head1 COMPARISON TO OTHER APIs
+
+Perl provides a range of in-built functions for handling external
+commands, and CPAN provides even more.  The C<IPC::System::Simple>
+differentiates itself from other options by providing:
+
+=over 4
+
+=item Extremely detailed diagnostics
+
+The diagnostics produced by C<IPC::System::Simple> are designed
+to provide as much information as possible.  Rather than requiring
+the developer to inspect C<$?>, C<IPC::System::Simple> does the
+hard work for you.
+
+If an odd exit status is provided, you're informed of what it is.  If
+a signal kills your process, you are informed of both its name and
+number.  If tainted data or environment prevents your command from
+running, you are informed of exactly which datais 
+
+=item Exceptions on failure
+
+C<IPC::System::Simple> takes an agressive approach to error handling.
+Rather than allow commands to fail silently, exceptions are thrown
+when unexpected results are seen.  This allows for easy development
+using a try/catch style, and avoids the possibility of accidently
+continuing after a failed command.
+
+=item Easy access to exit status
+
+The C<run>, C<system> and C<capture> commands all set C<$EXITVAL>,
+making it easy to determine the exit status of a command.
+Additionally, the C<system> and C<run> interfaces return the exit
+status.
+
+=item Consistent interfaces
+
+When called with multiple arguments, the C<run>, C<system> and
+C<capture> interfaces I<never> invoke the shell.  This differs
+from the in-built Perl C<system> command which may invoke the
+shell under Windows when called with multiple arguments.  It
+differs from the in-built Perl backticks operator which always
+invokes the shell.
+
+=back
+
 =head1 BUGS
 
+When C<system> is exported, the exotic form C<system { $cmd } @args>
+is not supported.  Attemping to use the exotic form is a syntax
+error.  This affects the calling package I<only>.
+
 Core dumps are only checked for when a process dies due to a
-signal.
+signal.  It is not believed thare exist any systems where processes
+can dump core without dying to a signal.
 
 C<WIFSTOPPED> status is not checked, as perl never spawns processes
 with the C<WUNTRACED> option.
 
-Signals are not supported under Win32 systems.
+Signals are not supported under Win32 systems, since they don't
+work at all like Unix signals.  Win32 singals cause commands to
+exit with a given exit value, which this modules I<does> capture.
 
 16-bit exit values are provided when C<run()> is called with multiple
-arguments under Windows, but only 8-bit values are returned when
+arguments under Windows.  Only 8-bit values are returned when
 C<run()> is called with a single value.  We should always return 16-bit
 value on systems that support them.
 
