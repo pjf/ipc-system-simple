@@ -466,31 +466,68 @@ IPC::System::Simple - Run commands simply, with detailed diagnostics
 
   use IPC::System::Simple qw(system capture);
 
-  system("some_command");   # Command succeeds or dies!
+  system("some_command");       # Command succeeds or dies!
 
-  system("some_command",@args); # Succeeds or dies, avoids the shell.
+  system("some_command",@args); # Succeeds or dies, avoiding the shell.
 
-  # Run some_command, capturing its output, just like backticks.
-  # If the command fails, dies with an error.
-
+  # Capture the output of a command (just like backticks). Die on error.
   my $output = capture("some_command");
+
+  # Just like backticks in list context.  Dies on error.
+  my @output = capture("some_command");
+
+  # Just like backticks, but avoid the shell!  Dies on error.
+  my $output = capture("some_command", @args);
 
 =head1 DESCRIPTION
 
-Calling Perl's in-built C<system()> function is easy, but checking
-the results can be hard.  C<IPC::System::Simple> aims to make
-life easy for the I<common cases> of calling C<system> and
-backticks (aka C<qx()>).
+Calling Perl's in-built C<system()> function is easy, but it's
+altogether too easy to ignore the return value.  Let's face it,
+C<$?> isn't the nicest variable in the world to play with, and
+even if you I<do> check it, producing a well-formatted error
+string takes a lot of work.
+
+C<IPC::System::Simple> takes the hard work out of calling commands.
+In fact, if you want to be really lazy, you can just write:
+
+    use IPC::System::Simple qw(system);
+
+and all of your C<system> commands will either succeeed (run to
+completion and return a zero exit value), or die with rich diagnostic
+messages.  You can customise which exit values are acceptable if
+you like.
+
+The C<IPC::System::Simple> module also provides a similar replace
+to Perl's backticks operator.  Simply write:
+
+    use IPC::System::Simple qw(capture);
+
+and then use the L</capture()> command just like you'd use backticks.
+If there's an error, it will die with a detailed description of what
+went wrong.  Better still, you can even use L</capture()> to run the
+equivalent of backticks, but without the shell:
+
+    my $result = capture($command, @args);
+
+If you want more power than the basic interface, including the
+ability to specify which exit values are acceptable, trap errors,
+or process diagnostics, then read on!
 
 =head1 ADVANCED SYNOPSIS
 
-  use IPC::System::Simple qw(capture run $EXITVAL EXIT_ANY);
+  use IPC::System::Simple qw(capture system run $EXITVAL EXIT_ANY);
 
   # Run a command, throwing exception on failure
 
   run("some_command");
 
   run("some_command",@args);  # Run a command, avoiding the shell
+
+  # Do the same thing, but with the drop-in system replacement.
+
+  system("some_command");
+
+  system("some_command, @args);
 
   # Run a command which must return 0..5, avoid the shell, and get the
   # exit value (we could also look at $EXITVAL)
@@ -519,7 +556,7 @@ backticks (aka C<qx()>).
 
 =head1 ADVNACED USAGE
 
-=head2 run
+=head2 run() and system()
 
 C<IPC::System::Simple> provides a subroutine called
 C<run>, that executes a command using the same semantics is
@@ -530,7 +567,20 @@ Perl's built-in C<system>:
 	run("cat *.txt");	# Execute command via the shell
 	run("cat","/etc/motd");	# Execute command without shell
 
-=head2 capture
+The primary difference between Perl's in-built system and
+the C<run> command is that C<run> will throw an exception on
+failure, and allows a list of acceptable exit values to be set.
+See L</Exit values> for further information.
+
+In fact, you can even have C<IPC::System::Simple> replace the
+default C<system> function for your package so it has the
+same behaviour:
+
+    use IPC::System::Simple qw(simple);
+
+    system("cat *.txt");  # system now suceeds or dies!
+
+=head2 capture()
 
 A second subroutine, named C<capture> executes a command with
 the same semantics as Perl's built-in backticks (and C<qx()>):
@@ -602,15 +652,22 @@ values by passing an I<array reference> as the first argument.  The
 special constant C<EXIT_ANY> can be used to allow I<any> exit value
 to be returned.
 
-	use IPC::System::Simple qw(run capture EXIT_ANY);
+	use IPC::System::Simple qw(run system capture EXIT_ANY);
 
 	run( [0..5], "cat *.txt");             # Exit values 0-5 are OK
 
+    system( [0..5], "cat *.txt");          # This works the same way
+
 	my @lines = capture( EXIT_ANY, "cat *.txt"); # Any exit is fine.
 
-The C<run> subroutine returns the exit value of the process:
+The C<run> and replacement C<system> subroutines returns the exit
+value of the process:
 
 	my $exit_value = run( [0..5], "cat *.txt");
+
+    # OR:
+
+    my $exit_value = system( [0..5] "cat *.txt");
 
 	print "Program exited with value $exit_value\n";
 
