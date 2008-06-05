@@ -45,6 +45,8 @@ sub admin {
     $_[0]->_top->{admin} or Module::Install::Base::FakeAdmin->new;
 }
 
+#line 101
+
 sub is_admin {
     $_[0]->admin->VERSION;
 }
@@ -67,4 +69,4 @@ BEGIN {
 
 1;
 
-#line 138
+#line 146
