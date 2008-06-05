@@ -656,7 +656,7 @@ to be returned.
 
 	run( [0..5], "cat *.txt");             # Exit values 0-5 are OK
 
-    system( [0..5], "cat *.txt");          # This works the same way
+	system( [0..5], "cat *.txt");          # This works the same way
 
 	my @lines = capture( EXIT_ANY, "cat *.txt"); # Any exit is fine.
 
@@ -665,9 +665,9 @@ value of the process:
 
 	my $exit_value = run( [0..5], "cat *.txt");
 
-    # OR:
+	# OR:
 
-    my $exit_value = system( [0..5] "cat *.txt");
+	my $exit_value = system( [0..5] "cat *.txt");
 
 	print "Program exited with value $exit_value\n";
 
