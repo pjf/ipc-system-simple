@@ -2,7 +2,7 @@
 Changes
 LICENSE
 MANIFEST
-META.yml			Module meta-data (added by MakeMaker)
+META.yml
 Makefile.PL
 README
 inc/Module/Install.pm
@@ -27,8 +27,8 @@ t/critic.t
 t/exiter.pl
 t/internal.t
 t/kwalitee.t
-t/output.pl
 t/not_an_exe.txt
+t/output.pl
 t/pod.t
 t/pod_coverage.t
 t/signaler.pl
