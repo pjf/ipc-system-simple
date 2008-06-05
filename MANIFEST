@@ -22,6 +22,7 @@ t/05_multi_capture.t
 t/06_fail.t
 t/07_taint.t
 t/08_core.t
+t/09_system.t
 t/critic.t
 t/exiter.pl
 t/internal.t
