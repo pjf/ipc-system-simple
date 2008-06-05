@@ -7,6 +7,7 @@ Revision history for Perl extension IPC::System::Simple.
 	- Added comparison to other system APIs.
 	- Updated Changes to put most recent changes at top.
 	- Makefile.PL tweaks to build cleanly under Debian's dh-make-perl.
+	- Upgraded to Module::Install 0.75.
 
 0.10  Thu May 15 00:39:59 AUSEST 2008
 	- Multi-arg captures now work on Perl 5.6.x. (RT #35866)
