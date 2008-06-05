@@ -1,11 +1,11 @@
 Revision history for Perl extension IPC::System::Simple.
 
 0.11
-    - Drop-in system() replacement available.
-    - Simplified synopsis statement.
-    - Provided advanced usage documentation.
-    - Added comparison to other system APIs.
-    - Updated Changes to put most recent changes at top.
+	- Drop-in system() replacement available.
+	- Simplified synopsis statement.
+	- Provided advanced usage documentation.
+	- Added comparison to other system APIs.
+	- Updated Changes to put most recent changes at top.
 
 0.10  Thu May 15 00:39:59 AUSEST 2008
 	- Multi-arg captures now work on Perl 5.6.x. (RT #35866)
