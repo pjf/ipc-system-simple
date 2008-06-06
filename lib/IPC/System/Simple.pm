@@ -23,8 +23,8 @@ use constant FAIL_START     => q{"%s" failed to start: "%s"};
 use constant FAIL_PLUMBING  => q{Error in IPC::System::Simple plumbing: "%s" - "%s"};
 use constant FAIL_CMD_BLANK => q{Entirely blank command passed: "%s"};
 use constant FAIL_INTERNAL  => q{Internal error in IPC::System::Simple: "%s"};
-use constant FAIL_TAINT     => q{IPC::System::Simple::%s called with tainted argument "%s"};
-use constant FAIL_TAINT_ENV => q{IPC::System::Simple::%s called with tainted environment $ENV{%s}};
+use constant FAIL_TAINT     => q{%s called with tainted argument "%s"};
+use constant FAIL_TAINT_ENV => q{%s called with tainted environment $ENV{%s}};
 use constant FAIL_SIGNAL    => q{"%s" died to signal "%s" (%d)%s};
 use constant FAIL_BADEXIT   => q{"%s" unexpectedly returned exit value %d};
 
@@ -44,7 +44,7 @@ use constant UNDEFINED_POSIX_RE => qr{not (?:defined|a valid) POSIX macro};
 require Exporter;
 our @ISA = qw(Exporter);
 our @EXPORT_OK = qw( capture run $EXITVAL EXIT_ANY system );
-our $VERSION = '0.11';
+our $VERSION = '0.12';
 our $EXITVAL = -1;
 
 my @Signal_from_number = split(' ', $Config{sig_name});
@@ -437,7 +437,7 @@ sub _process_args {
 	my $caller = (caller(1))[3];
 
 	if (not @_) {
-		croak "IPC::System::Simple::$caller called with no arguments";
+		croak "$caller called with no arguments";
 	}
 
 	if (ref $_[0] eq "ARRAY") {
@@ -445,7 +445,7 @@ sub _process_args {
 	}
 
 	if (not @_) {
-		croak "IPC::System::Simple::$caller called with no command";
+		croak "$caller called with no command";
 	}
 
 	my $command = shift(@_);

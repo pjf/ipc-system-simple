@@ -1,6 +1,11 @@
 Revision history for Perl extension IPC::System::Simple.
 
-0.11
+0.12  Fri Jun  6 17:15:52 AUSEST 2008
+	- Corrected doubled package names in some diagnostics
+	  when used in taint mode, or when run() is called without
+	  arguments.
+
+0.11  Fri Jun  6 12:15:39 AUSEST 2008
 	- Drop-in system() replacement available.
 	- Simplified synopsis statement.
 	- Provided advanced usage documentation.
