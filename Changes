@@ -1,5 +1,9 @@
 Revision history for Perl extension IPC::System::Simple.
 
+0.13
+	- Added examples directory with examples.
+	- Updated manifest to include error message regession tests.
+
 0.12  Fri Jun  6 17:15:52 AUSEST 2008
 	- Corrected doubled package names in some diagnostics
 	  when used in taint mode, or when run() is called without
