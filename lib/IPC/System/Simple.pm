@@ -28,7 +28,6 @@ use constant FAIL_TAINT_ENV => q{%s called with tainted environment $ENV{%s}};
 use constant FAIL_SIGNAL    => q{"%s" died to signal "%s" (%d)%s};
 use constant FAIL_BADEXIT   => q{"%s" unexpectedly returned exit value %d};
 
-
 use constant FAIL_POSIX     => q{IPC::System::Simple does not understand the POSIX error '%s'.  Please check http://search.cpan.org/perldoc?IPC::System::Simple to see if there is an updated version.  If not please report this as a bug to http://rt.cpan.org/Public/Bug/Report.html?Queue=IPC-System-Simple};
 
 # On Perl's older than 5.8.x we can't assume that there'll be a
@@ -314,7 +313,7 @@ sub _spawn_or_die {
 
 	# We need to wrap practically the entire sub in an
 	# if block to ensure it doesn't get compiled under non-Win32
-	# systems.  Compiling on this systems would not only be a
+	# systems.  Compiling on these systems would not only be a
 	# waste of time, but also results in complaints about
 	# the NORMAL_PRIORITY_CLASS constant.
 
