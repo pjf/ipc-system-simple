@@ -25,6 +25,7 @@ t/07_taint.t
 t/08_core.t
 t/09_system.t
 t/10_formatting.t
+t/11_newlines.t
 t/critic.t
 t/exiter.pl
 t/internal.t

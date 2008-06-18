@@ -8,6 +8,8 @@ Revision history for Perl extension IPC::System::Simple.
 	  win32.t.  Corrected documentation regarding Win32 exitval
 	  size.  Thanks to Jan Dubois for alerting me to the 32-bitness
 	  of Windows exit values.
+	- Added tests to ensure that newlines are properly stripped
+	  with single-arg system and capture.
 
 0.12  Fri Jun  6 17:15:52 AUSEST 2008
 	- Corrected doubled package names in some diagnostics
