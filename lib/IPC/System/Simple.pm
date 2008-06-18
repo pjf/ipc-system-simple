@@ -691,12 +691,12 @@ being terminated by a signal) or did not start.
 =head2 WINDOWS-SPECIFIC NOTES
 
 As of C<IPC::System::Simple> v0.06, the C<run> subroutine I<when
-called with multiple arguments> will make available the full 16-bit
+called with multiple arguments> will make available the full 32-bit
 exit value on Win32 systems.  This is different from the
 previous versions of C<IPC::System::Simple> and from Perl's
 in-build C<system()> function, which can only handle 8-bit return values.
 
-The C<capture> subroutine always returns the 16-bit exit value under
+The C<capture> subroutine always returns the 32-bit exit value under
 Windows.  The C<capture> subroutine also never uses the shell,
 even when passed a single argument.
 
@@ -850,9 +850,9 @@ Signals are not supported under Win32 systems, since they don't
 work at all like Unix signals.  Win32 singals cause commands to
 exit with a given exit value, which this modules I<does> capture.
 
-16-bit exit values are provided when C<run()> is called with multiple
+32-bit exit values are provided when C<run()> is called with multiple
 arguments under Windows.  Only 8-bit values are returned when
-C<run()> is called with a single value.  We should always return 16-bit
+C<run()> is called with a single value.  We should always return 32-bit
 value on systems that support them.
 
 =head2 Reporting bugs

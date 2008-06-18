@@ -15,7 +15,7 @@ use constant BIG_EXIT => 1000;
 use constant HUGE_EXIT => 100_000;
 
 # This helper file allow us to exit wit a given value
-use constant EXIT_BAT => 'myexit.bat';
+use constant EXIT_CMD => [ ( $ENV{ComSpec}|| 'cmd') ,'/c','exit'];
 
 if ($^O ne "MSWin32") {
 	plan skip_all => "Win32 only tests";
@@ -40,7 +40,7 @@ foreach my $big_exitval (SMALL_EXIT, BIG_EXIT, HUGE_EXIT) {
 
     my $exit;
     eval {
-        $exit = run([$big_exitval], EXIT_BAT, $big_exitval);
+        $exit = run([$big_exitval], @{&EXIT_CMD}, $big_exitval);
     };
 
     is($@,"","Running with $big_exitval ok");
@@ -49,7 +49,7 @@ foreach my $big_exitval (SMALL_EXIT, BIG_EXIT, HUGE_EXIT) {
     my $capture;
     
     eval {
-	$capture = capture([$big_exitval], EXIT_BAT, $big_exitval);
+	$capture = capture([$big_exitval], @{&EXIT_CMD}, $big_exitval);
     };
 
     is($@,"","Capturing with $big_exitval ok");

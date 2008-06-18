@@ -4,6 +4,9 @@ Revision history for Perl extension IPC::System::Simple.
 	- Added examples directory with examples.
 	- Updated manifest to include error message regession tests.
 	- Test::Kwalitee is now marked as an author-only test.
+	- Added tests for correct handling of 32-bit values in
+	  win32.t.  Corrected documentation regarding Win32 exitval
+	  size.
 
 0.12  Fri Jun  6 17:15:52 AUSEST 2008
 	- Corrected doubled package names in some diagnostics
