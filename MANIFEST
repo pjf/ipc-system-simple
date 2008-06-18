@@ -1,10 +1,5 @@
 .perlcriticrc
 Changes
-LICENSE
-MANIFEST
-META.yml
-Makefile.PL
-README
 examples/rsync-backup.pl
 inc/Module/Install.pm
 inc/Module/Install/Base.pm
@@ -15,6 +10,11 @@ inc/Module/Install/Metadata.pm
 inc/Module/Install/Win32.pm
 inc/Module/Install/WriteAll.pm
 lib/IPC/System/Simple.pm
+LICENSE
+Makefile.PL
+MANIFEST
+META.yml
+README
 t/01_load.t
 t/02_exit.t
 t/03_signal.t
