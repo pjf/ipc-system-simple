@@ -10,6 +10,7 @@ Revision history for Perl extension IPC::System::Simple.
 	  of Windows exit values.
 	- Added tests to ensure that newlines are properly stripped
 	  with single-arg system and capture.
+	- Pod and Pod Coverage tests are now marked as author-only.
 
 0.12  Fri Jun  6 17:15:52 AUSEST 2008
 	- Corrected doubled package names in some diagnostics
