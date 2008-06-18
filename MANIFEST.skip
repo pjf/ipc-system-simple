@@ -1,0 +1,11 @@
+.git
+.cvsignore
+.gitignore
+pm_to_lib
+MANIFEST.bak
+MANIFEST.skip
+blib
+.*.pm~$
+Makefile$
+Makefile.old
+IPC-System-Simple-.*.tar.gz
