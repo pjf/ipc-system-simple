@@ -58,6 +58,16 @@ foreach my $big_exitval (SMALL_EXIT, BIG_EXIT, HUGE_EXIT) {
     is($EXITVAL,$big_exitval,"Capture ok with $big_exitval exit value");
 }
 
+# As of June 2008, all versions of Perl under Win32 have a bug where
+# they can execute a command twice if it returns -1 and $! is set
+# to ENOENT or ENOEXEC before system is called.  
+
+# TODO: Test to see if we're running on a Perl that stuffers from
+# this bug.
+
+# TODO: Make sure that we *don't* suffer from this bug.
+
+
 # Testing to ensure that our PATH gets respected...
 
 $ENV{PATH} = "";
