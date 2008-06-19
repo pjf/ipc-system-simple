@@ -5,6 +5,12 @@ use File::Basename qw(fileparse);
 use IPC::System::Simple qw(run capture $EXITVAL);
 use Config;
 
+BEGIN {
+    if ($^O ne "MSWin32") {
+	    plan skip_all => "Win32 only tests";
+    }
+}
+
 # This number needs to fit into an 8 bit integer
 use constant SMALL_EXIT => 42;
 
@@ -14,12 +20,8 @@ use constant BIG_EXIT => 1000;
 # This needs to fit into a 32-bit integer, but not a 16-bit integer.
 use constant HUGE_EXIT => 100_000;
 
-# This helper file allow us to exit wit a given value
-use constant EXIT_CMD => [ ( $ENV{ComSpec}|| 'cmd') ,'/c','exit'];
-
-if ($^O ne "MSWin32") {
-	plan skip_all => "Win32 only tests";
-}
+# This command should allow us to exit with a specific value.
+use constant EXIT_CMD => [ @{ &IPC::System::Simple::WINDOWS_SHELL }, 'exit'];
 
 plan tests => 28;
 

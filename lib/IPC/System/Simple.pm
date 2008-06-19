@@ -12,6 +12,13 @@ use constant WINDOWS => ($^O eq 'MSWin32');
 use constant VMS     => ($^O eq 'VMS');
 use if WINDOWS, 'Win32::Process', qw(INFINITE NORMAL_PRIORITY_CLASS);
 use if WINDOWS, 'File::Spec';
+use if WINDOWS, 'Win32';
+
+# This uses the same rules as the core win32.c/get_shell() call.
+
+use if WINDOWS,
+	'constant',WINDOWS_SHELL => Win32::IsWinNT() ? [ qw(cmd.exe /x/d/c) ]
+                                                     : [ qw(command.com /c) ];
 
 # Note that we don't use WIFSTOPPED because perl never uses
 # the WUNTRACED flag, and hence will never return early from
@@ -74,7 +81,7 @@ if ($@ =~ UNDEFINED_POSIX_RE) {
 }
 
 # None of the POSIX modules I've found define WCOREDUMP, although
-# many systems define it.  Check the POSIX module on the hope that
+# many systems define it.  Check the POSIX module in the hope that
 # it may actually be there.
 
 eval { POSIX::WCOREDUMP(1); };
@@ -114,6 +121,7 @@ sub run {
 		$pid->Wait(INFINITE);	# Wait for process exit.
 		$pid->GetExitCode($EXITVAL);
 		return _check_exit($command,$EXITVAL,$valid_returns);
+
 	}
 
 	# On non-Win32 systems, or when we don't have multiple argument,
