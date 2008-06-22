@@ -13,6 +13,8 @@ Revision history for Perl extension IPC::System::Simple.
 	- Pod and Pod Coverage tests are now marked as author-only.
 	- Added perl core identical rules for determining the Windows
 	  shell.
+	- Added META.yml resources, including blog, bugtracker,
+	  forum, and repository.
 
 0.12  Fri Jun  6 17:15:52 AUSEST 2008
 	- Corrected doubled package names in some diagnostics
