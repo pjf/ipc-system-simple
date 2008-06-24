@@ -1,6 +1,6 @@
 #!/usr/bin/perl -wT
 use strict;
-use Test::More tests => 11;
+use Test::More tests => 13;
 use Scalar::Util qw(tainted);
 use Config;
 
@@ -13,7 +13,8 @@ if ($^O ne 'VMS') {
 
 ok(! tainted($perl_path), '$perl_path is clean');
 
-use_ok("IPC::System::Simple","run");
+use_ok("IPC::System::Simple","run","capture");
+
 chdir("t");     # Ignore return, since we may already be in t/
 
 my $taint = $ENV{(keys(%ENV))[0]} . "foo";	# ."foo" to avoid zero length
@@ -47,3 +48,9 @@ is($@, "", "Single-arg, clean data and ENV");
 
 eval { run($perl_path, "exiter.pl", 0); };
 is($@, "", "Multi-arg, clean data and ENV");
+
+my $data = eval { capture($perl_path, "exiter.pl", 0) };
+ok(tainted($data), "Returns of multi-arg capture should be tainted");
+
+$data = eval { capture("$perl_path exiter.pl 0") };
+ok(tainted($data), "Returns of single-arg capture should be tainted");

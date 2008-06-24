@@ -15,6 +15,8 @@ Revision history for Perl extension IPC::System::Simple.
 	  shell.
 	- Added META.yml resources, including blog, bugtracker,
 	  forum, and repository.
+	- Additional tests to ensure returns from capture() are
+	  properly tainted (when running in taint mode).
 
 0.12  Fri Jun  6 17:15:52 AUSEST 2008
 	- Corrected doubled package names in some diagnostics
