@@ -16,9 +16,9 @@ use if WINDOWS, 'Win32';
 
 # This uses the same rules as the core win32.c/get_shell() call.
 
-use if WINDOWS,
-	'constant',WINDOWS_SHELL => Win32::IsWinNT() ? [ qw(cmd.exe /x/d/c) ]
-                                                     : [ qw(command.com /c) ];
+use if WINDOWS, 'constant', WINDOWS_SHELL => eval { Win32::IsWinNT() }
+	                                  ? [ qw(cmd.exe /x/d/c) ]
+                                          : [ qw(command.com /c) ];
 
 # Note that we don't use WIFSTOPPED because perl never uses
 # the WUNTRACED flag, and hence will never return early from
