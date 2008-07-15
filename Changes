@@ -17,6 +17,9 @@ Revision history for Perl extension IPC::System::Simple.
 	  forum, and repository.
 	- Additional tests to ensure returns from capture() are
 	  properly tainted (when running in taint mode).
+        - Added systemx() and capturex() that _never_ invoke the
+          shell.   Thanks to ikegami for prodding me on these.
+          (RT #37683)
 
 0.12  Fri Jun  6 17:15:52 AUSEST 2008
 	- Corrected doubled package names in some diagnostics

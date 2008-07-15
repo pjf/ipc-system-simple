@@ -49,7 +49,7 @@ use constant UNDEFINED_POSIX_RE => qr{not (?:defined|a valid) POSIX macro};
 
 require Exporter;
 our @ISA = qw(Exporter);
-our @EXPORT_OK = qw( capture run $EXITVAL EXIT_ANY system );
+our @EXPORT_OK = qw( capture run $EXITVAL EXIT_ANY system systemx capturex );
 our $VERSION = '0.13';
 our $EXITVAL = -1;
 
@@ -107,32 +107,50 @@ sub run {
 
 	my ($valid_returns, $command, @args) = _process_args(@_);
 
-	# With the wonders of constant folding the following code
-	# is completely optimised away under non-windows systems.
+        # If we have arguments, we really want to call systemx,
+        # so we do so.
 
-	# The following essentially emulates multi-argument system,
-	# bypassing the shell entirely.
-
-	if (WINDOWS and @args) {
-		our $EXITVAL = -1;
-
-		my $pid = _spawn_or_die($command, "$command @args");
-
-		$pid->Wait(INFINITE);	# Wait for process exit.
-		$pid->GetExitCode($EXITVAL);
-		return _check_exit($command,$EXITVAL,$valid_returns);
-
+	if (@args) {
+                return systemx($valid_returns, $command, @args);
 	}
 
-	# On non-Win32 systems, or when we don't have multiple argument,
-	# we have an easier time.
+        # Without arguments, we're calling system, and checking
+        # the results.
 
 	# We're throwing our own exception on command not found, so
 	# we don't need a warning from Perl.
+
 	no warnings 'exec';		## no critic
 	CORE::system($command,@args);
 
 	return _process_child_error($?,$command,$valid_returns);
+}
+
+# systemx is just like system/run, but *never* invokes the shell.
+
+sub systemx {
+    _check_taint(@_);
+
+    my ($valid_returns, $command, @args) = _process_args(@_);
+
+    if (WINDOWS) {
+        our $EXITVAL = -1;
+
+        my $pid = _spawn_or_die($command, "$command @args");
+
+        $pid->Wait(INFINITE);	# Wait for process exit.
+        $pid->GetExitCode($EXITVAL);
+        return _check_exit($command,$EXITVAL,$valid_returns);
+    }
+
+    # If system() fails, we throw our own exception.  We don't
+    # need to have perl complain about it too.
+
+    no warnings; ## no critic
+
+    CORE::system { $command } $command, @args;
+
+    return _process_child_error($?, $command, $valid_returns);
 }
 
 # capture is our way of running a process with backticks/qx semantics
@@ -142,15 +160,44 @@ sub capture {
 
 	my ($valid_returns, $command, @args) = _process_args(@_);
 
+        if (WINDOWS or @args) {
+            return capturex($valid_returns, $command, @args);
+        }
+
+	our $EXITVAL = -1;
+
+	my $wantarray = wantarray();
+
+	# We'll produce our own warnings on failure to execute.
+	no warnings 'exec';	## no critic
+
+        if ($wantarray) {
+                my @results = qx($command);
+                _process_child_error($?,$command,$valid_returns);
+                return @results;
+        } 
+
+        my $results = qx($command);
+        _process_child_error($?,$command,$valid_returns);
+        return $results;
+}
+
+# capturex() is just like backticks/qx, but never invokes the shell.
+
+sub capturex {
+	_check_taint(@_);
+
+	my ($valid_returns, $command, @args) = _process_args(@_);
+
 	our $EXITVAL = -1;
 
 	my $wantarray = wantarray();
 
 	if (WINDOWS) {
-		# Perl doesn't support multi-arg backticks under
+		# Perl doesn't support multi-arg open under
 		# Windows.  Perl also doesn't provide very good
-		# feedback when normal backtails fail, either,
-		# instead returning the exit status from the shell
+		# feedback when normal backtails fail, either;
+		# it returns exit status from the shell
 		# (which is indistinguishable from the command
 		# running and producing the same exit status).
 
@@ -219,24 +266,6 @@ sub capture {
 		return $wantarray ? @results : $result;
 	}
 
-	# We'll produce our own warnings on failure to execute.
-	no warnings 'exec';	## no critic
-
-	if (not @args) {
-		if ($wantarray) {
-			my @results = qx($command);
-			_process_child_error($?,$command,$valid_returns);
-			return @results;
-		} 
-
-		my $results = qx($command);
-		_process_child_error($?,$command,$valid_returns);
-		return $results;
-	}
-
-	# If we're here, we have arguments.  Avoid the shell using
-	# multi-arg open.
-
 	# We can't use a multi-arg piped open here, since 5.6.x
 	# doesn't like them.  Instead we emulate what 5.8.x does,
 	# which is to create a pipe(), set the close-on-exec flag
@@ -263,7 +292,7 @@ sub capture {
 
 		no warnings;   ## no critic
 
-		exec($command, @args);
+		CORE::exec { $command } $command, @args;
 
 		# Oh no, exec fails!  Send the reason why to
 		# the parent.
@@ -471,11 +500,14 @@ IPC::System::Simple - Run commands simply, with detailed diagnostics
 
 =head1 SYNOPSIS
 
-  use IPC::System::Simple qw(system capture);
+  use IPC::System::Simple qw(system systemx capture capturex);
 
   system("some_command");       # Command succeeds or dies!
 
-  system("some_command",@args); # Succeeds or dies, avoiding the shell.
+  system("some_command",@args); # Succeeds or dies, avoids shell if @args
+
+  systemx("some_command,@args); # Succeeds or dies, NEVER uses the shell
+
 
   # Capture the output of a command (just like backticks). Die on error.
   my $output = capture("some_command");
@@ -483,8 +515,12 @@ IPC::System::Simple - Run commands simply, with detailed diagnostics
   # Just like backticks in list context.  Dies on error.
   my @output = capture("some_command");
 
-  # Just like backticks, but avoid the shell!  Dies on error.
+  # As above, but avoids the shell if @args is non-empty
   my $output = capture("some_command", @args);
+
+  # As above, but NEVER invokes the shell.
+  my $output = capturex("some_command", @args);
+  my @output = capturex("some_command", @args);
 
 =head1 DESCRIPTION
 
