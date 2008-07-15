@@ -20,6 +20,10 @@ use if WINDOWS, 'constant', WINDOWS_SHELL => eval { Win32::IsWinNT() }
 	                                  ? [ qw(cmd.exe /x/d/c) ]
                                           : [ qw(command.com /c) ];
 
+# These are used when invoking _win32_capture
+use if WINDOWS, 'constant', NO_SHELL  => 0;
+use if WINDOWS, 'constant', USE_SHELL => 1;
+
 # Note that we don't use WIFSTOPPED because perl never uses
 # the WUNTRACED flag, and hence will never return early from
 # system() if the child processes is suspended with a SIGSTOP.
@@ -160,8 +164,13 @@ sub capture {
 
 	my ($valid_returns, $command, @args) = _process_args(@_);
 
-        if (WINDOWS or @args) {
+        if (@args) {
             return capturex($valid_returns, $command, @args);
+        }
+
+        if (WINDOWS) {
+            # USE_SHELL really means "You may use the shell if you need it."
+            return _win32_capture(USE_SHELL, $valid_returns, $command, @args);
         }
 
 	our $EXITVAL = -1;
@@ -182,6 +191,103 @@ sub capture {
         return $results;
 }
 
+# _win32_capture implements the capture and capurex commands on Win32.
+# We need to wrap the whole internals of this sub into
+# an if (WINDOWS) block to avoid it being compiled on non-Win32 systems.
+
+sub _win32_capture {
+    if (not WINDOWS) {
+        croak sprintf(FAIL_INTERNAL, "_win32_capture called when not under Win32");
+    } else {
+
+        my ($use_shell, $valid_returns, $command, @args) = @_;
+
+        my $wantarray = wantarray();
+
+        # Perl doesn't support multi-arg open under
+        # Windows.  Perl also doesn't provide very good
+        # feedback when normal backtails fail, either;
+        # it returns exit status from the shell
+        # (which is indistinguishable from the command
+        # running and producing the same exit status).
+
+        # As such, we essentially have to write our own
+        # backticks.
+
+        # We start by dup'ing STDOUT.
+
+        open(my $saved_stdout, '>&', \*STDOUT)  ## no critic
+                or croak sprintf(FAIL_PLUMBING, "Can't dup STDOUT", $!);
+
+        # We now open up a pipe that will allow us to	
+        # communicate with the new process.
+
+        pipe(my ($read_fh, $write_fh))
+                or croak sprintf(FAIL_PLUMBING, "Can't create pipe", $!);
+
+        # Allow CRLF sequences to become "\n", since
+        # this is what Perl backticks do.
+
+        binmode($read_fh, ':crlf');
+
+        # Now we re-open our STDOUT to $write_fh...
+
+        open(STDOUT, '>&', $write_fh)  ## no critic
+                or croak sprintf(FAIL_PLUMBING, "Can't redirect STDOUT", $!);
+
+        # If we have args, or we're told not to use the shell, then
+        # we treat $command as our shell.  Otherwise we grub around
+        # in our command to look for a command to run.
+        #
+        # Note that we don't actually *use* the shell (although in
+        # a future version we might).  Being told not to use the shell
+        # (capturex) means we treat our command as really being a command,
+        # and not a command line.
+
+        my $exe =   @args                      ? $command :
+                    (! $use_shell)             ? $command :
+                    $command =~ m{^"([^"]+)"}x ? $1       :
+                    $command =~ m{(\S+)     }x ? $1       :
+                    croak sprintf(FAIL_CMD_BLANK, $command);
+
+        # And now we spawn our new process with inherited
+        # filehandles.
+
+        my $pid = _spawn_or_die($exe, "$command @args");
+
+        # Now restore our STDOUT.
+        open(STDOUT, '>&', $saved_stdout)  ## no critic
+                or croak sprintf(FAIL_PLUMBING,"Can't restore STDOUT", $!);
+
+        # Clean-up the filehandles we no longer need...
+
+        close($write_fh)
+                or croak sprintf(FAIL_PLUMBING,q{Can't close write end of pipe}, $!);
+        close($saved_stdout)
+                or croak sprintf(FAIL_PLUMBING,q{Can't close saved STDOUT}, $!);
+
+        # Read the data from our child...
+
+        my (@results, $result);
+
+        if ($wantarray) {
+                @results = <$read_fh>;
+        } else {
+                $result = join("",<$read_fh>);
+        }
+
+        # Tidy up our windows process and we're done!
+
+        $pid->Wait(INFINITE);	# Wait for process exit.
+        $pid->GetExitCode($EXITVAL);
+
+        _check_exit($command,$EXITVAL,$valid_returns);
+
+        return $wantarray ? @results : $result;
+
+    }
+}
+
 # capturex() is just like backticks/qx, but never invokes the shell.
 
 sub capturex {
@@ -194,77 +300,8 @@ sub capturex {
 	my $wantarray = wantarray();
 
 	if (WINDOWS) {
-		# Perl doesn't support multi-arg open under
-		# Windows.  Perl also doesn't provide very good
-		# feedback when normal backtails fail, either;
-		# it returns exit status from the shell
-		# (which is indistinguishable from the command
-		# running and producing the same exit status).
-
-		# As such, we essentially have to write our own
-		# backticks.
-
-		# We start by dup'ing STDOUT.
-
-		open(my $saved_stdout, '>&', \*STDOUT)  ## no critic
-			or croak sprintf(FAIL_PLUMBING, "Can't dup STDOUT", $!);
-
-		# We now open up a pipe that will allow us to	
-		# communicate with the new process.
-
-		pipe(my ($read_fh, $write_fh))
-			or croak sprintf(FAIL_PLUMBING, "Can't create pipe", $!);
-
-		# Allow CRLF sequences to become "\n", since
-		# this is what Perl backticks do.
-
-		binmode($read_fh, ':crlf');
-
-		# Now we re-open our STDOUT to $write_fh...
-
-		open(STDOUT, '>&', $write_fh)  ## no critic
-			or croak sprintf(FAIL_PLUMBING, "Can't redirect STDOUT", $!);
-
-		# And now we spawn our new process with inherited
-		# filehandles.
-
-		my $exe = @args                      ? $command :
-			  $command =~ m{^"([^"]+)"}x ? $1       :
-			  $command =~ m{(\S+)     }x ? $1       :
-			  croak sprintf(FAIL_CMD_BLANK, $command);
-
-		my $pid = _spawn_or_die($exe, "$command @args");
-
-		# Now restore our STDOUT.
-		open(STDOUT, '>&', $saved_stdout)  ## no critic
-			or croak sprintf(FAIL_PLUMBING,"Can't restore STDOUT", $!);
-
-		# Clean-up the filehandles we no longer need...
-
-		close($write_fh)
-			or croak sprintf(FAIL_PLUMBING,q{Can't close write end of pipe}, $!);
-		close($saved_stdout)
-			or croak sprintf(FAIL_PLUMBING,q{Can't close saved STDOUT}, $!);
-
-		# Read the data from our child...
-
-		my (@results, $result);
-
-		if ($wantarray) {
-			@results = <$read_fh>;
-		} else {
-			$result = join("",<$read_fh>);
-		}
-
-		# Tidy up our windows process and we're done!
-
-		$pid->Wait(INFINITE);	# Wait for process exit.
-		$pid->GetExitCode($EXITVAL);
-
-		_check_exit($command,$EXITVAL,$valid_returns);
-
-		return $wantarray ? @results : $result;
-	}
+            return _win32_capture(NO_SHELL, $valid_returns, $command, @args);
+        }
 
 	# We can't use a multi-arg piped open here, since 5.6.x
 	# doesn't like them.  Instead we emulate what 5.8.x does,
