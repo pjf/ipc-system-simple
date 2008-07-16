@@ -101,7 +101,8 @@ if ($@ =~ UNDEFINED_POSIX_RE) {
 
 # system simply calls run
 
-*system = \&run;
+*system  = \&run;
+*systemx = \&runx;
 
 # run is our way of running a process with system() semantics
 
@@ -130,9 +131,9 @@ sub run {
 	return _process_child_error($?,$command,$valid_returns);
 }
 
-# systemx is just like system/run, but *never* invokes the shell.
+# runx is just like system/run, but *never* invokes the shell.
 
-sub systemx {
+sub runx {
     _check_taint(@_);
 
     my ($valid_returns, $command, @args) = _process_args(@_);
@@ -546,7 +547,7 @@ IPC::System::Simple - Run commands simply, with detailed diagnostics
   systemx("some_command,@args); # Succeeds or dies, NEVER uses the shell
 
 
-  # Capture the output of a command (just like backticks). Die on error.
+  # Capture the output of a command (just like backticks). Dies on error.
   my $output = capture("some_command");
 
   # Just like backticks in list context.  Dies on error.
@@ -561,33 +562,35 @@ IPC::System::Simple - Run commands simply, with detailed diagnostics
 
 =head1 DESCRIPTION
 
-Calling Perl's in-built C<system()> function is easy, but it's
-altogether too easy to ignore the return value.  Let's face it,
+Calling Perl's in-built C<system()> function is easy, 
+determining if it was successful is I<hard>.  Let's face it,
 C<$?> isn't the nicest variable in the world to play with, and
 even if you I<do> check it, producing a well-formatted error
 string takes a lot of work.
 
-C<IPC::System::Simple> takes the hard work out of calling commands.
-In fact, if you want to be really lazy, you can just write:
+C<IPC::System::Simple> takes the hard work out of calling 
+external commands.  In fact, if you want to be really lazy,
+you can just write:
 
     use IPC::System::Simple qw(system);
 
 and all of your C<system> commands will either succeeed (run to
 completion and return a zero exit value), or die with rich diagnostic
-messages.  You can customise which exit values are acceptable if
-you like.
+messages.
 
-The C<IPC::System::Simple> module also provides a similar replace
+The C<IPC::System::Simple> module also provides a simple replacement
 to Perl's backticks operator.  Simply write:
 
     use IPC::System::Simple qw(capture);
 
 and then use the L</capture()> command just like you'd use backticks.
 If there's an error, it will die with a detailed description of what
-went wrong.  Better still, you can even use L</capture()> to run the
+went wrong.  Better still, you can even use L</capturex()> to run the
 equivalent of backticks, but without the shell:
 
-    my $result = capture($command, @args);
+    use IPC::System::Simple qw(capturex);
+
+    my $result = capturex($command, @args);
 
 If you want more power than the basic interface, including the
 ability to specify which exit values are acceptable, trap errors,
@@ -595,28 +598,30 @@ or process diagnostics, then read on!
 
 =head1 ADVANCED SYNOPSIS
 
-  use IPC::System::Simple qw(capture system run $EXITVAL EXIT_ANY);
+  use IPC::System::Simple qw(
+    capture capturex system systemx run runx $EXITVAL EXIT_ANY
+  );
 
   # Run a command, throwing exception on failure
 
   run("some_command");
 
-  run("some_command",@args);  # Run a command, avoiding the shell
+  runx("some_command",@args);  # Run a command, avoiding the shell
 
   # Do the same thing, but with the drop-in system replacement.
 
   system("some_command");
 
-  system("some_command, @args);
+  systemx("some_command, @args);
 
   # Run a command which must return 0..5, avoid the shell, and get the
   # exit value (we could also look at $EXITVAL)
 
-  my $exit_value = run([0..5], "some_command", @args);
+  my $exit_value = runx([0..5], "some_command", @args);
 
   # The same, but any exit value will do.
 
-  my $exit_value = run(EXIT_ANY, "some_command", @args);
+  my $exit_value = runx(EXIT_ANY, "some_command", @args);
 
   # Capture output into $result and throw exception on failure
 
@@ -632,7 +637,7 @@ or process diagnostics, then read on!
   # Run a command which must return 0..5, capture the output into
   # @lines, and avoid the shell.
 
-  my @lines  = capture([0..5], "some_command", @args);
+  my @lines  = capturex([0..5], "some_command", @args);
 
 =head1 ADVNACED USAGE
 
@@ -918,7 +923,9 @@ invokes the shell.
 
 When C<system> is exported, the exotic form C<system { $cmd } @args>
 is not supported.  Attemping to use the exotic form is a syntax
-error.  This affects the calling package I<only>.
+error.  This affects the calling package I<only>.  Use C<CORE::system>
+if you need it, or consider using the L<autodie> module to replace
+C<system> with lexical scope.
 
 Core dumps are only checked for when a process dies due to a
 signal.  It is not believed thare exist any systems where processes
@@ -931,10 +938,10 @@ Signals are not supported under Win32 systems, since they don't
 work at all like Unix signals.  Win32 singals cause commands to
 exit with a given exit value, which this modules I<does> capture.
 
-32-bit exit values are provided when C<run()> is called with multiple
-arguments under Windows.  Only 8-bit values are returned when
-C<run()> is called with a single value.  We should always return 32-bit
-value on systems that support them.
+Only 8-bit values are returned when C<run()> or C<system()> 
+is called with a single value under Win32.  Multi-argument calls
+to C<run()> and C<system()>, as well as the C<runx()> and
+C<systemx()> always return the 32-bit Windows return values.
 
 =head2 Reporting bugs
 
@@ -951,6 +958,9 @@ Submitting a patch and/or failing test case will greatly expediate
 the fixing of bugs.
 
 =head1 SEE ALSO
+
+L<autodie> uses C<IPC::System::Simple> to provide succeed-or-die
+replacements to C<system> (and other built-ins) with lexical scope.
 
 L<POSIX>, L<IPC::Run::Simple>, L<perlipc>, L<perlport>, L<IPC::Run>,
 L<IPC::Run3>, L<Win32::Process>
