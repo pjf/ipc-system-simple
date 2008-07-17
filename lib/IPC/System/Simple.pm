@@ -49,12 +49,12 @@ use constant ASSUME_TAINTED => ($] < 5.008);
 use constant EXIT_ANY_CONST => -1;			# Used internally
 use constant EXIT_ANY       => [ EXIT_ANY_CONST ];	# Exported
 
-use constant UNDEFINED_POSIX_RE => qr{not (?:defined|a valid) POSIX macro};
+use constant UNDEFINED_POSIX_RE => qr{not (?:defined|a valid) POSIX macro|not implemented on this architecture};
 
 require Exporter;
 our @ISA = qw(Exporter);
 our @EXPORT_OK = qw( capture run $EXITVAL EXIT_ANY system systemx capturex );
-our $VERSION = '0.13';
+our $VERSION = '0.14';
 our $EXITVAL = -1;
 
 my @Signal_from_number = split(' ', $Config{sig_name});
