@@ -585,7 +585,7 @@ to Perl's backticks operator.  Simply write:
 
 and then use the L</capture()> command just like you'd use backticks.
 If there's an error, it will die with a detailed description of what
-went wrong.  Better still, you can even use L</capturex()> to run the
+went wrong.  Better still, you can even use C<capturex()> to run the
 equivalent of backticks, but without the shell:
 
     use IPC::System::Simple qw(capturex);
@@ -647,10 +647,10 @@ C<IPC::System::Simple> provides a subroutine called
 C<run>, that executes a command using the same semantics is
 Perl's built-in C<system>:
 
-	use IPC::System::Simple qw(run);
+    use IPC::System::Simple qw(run);
 
-	run("cat *.txt");	# Execute command via the shell
-	run("cat","/etc/motd");	# Execute command without shell
+    run("cat *.txt");           # Execute command via the shell
+    run("cat","/etc/motd");     # Execute command without shell
 
 The primary difference between Perl's in-built system and
 the C<run> command is that C<run> will throw an exception on
@@ -665,23 +665,44 @@ same behaviour:
 
     system("cat *.txt");  # system now suceeds or dies!
 
+See also L</runx(), systemx() and capturex()> for variants of
+C<system()> and C<run()> that never invoke the shell, even with
+a single argument.
+
 =head2 capture()
 
 A second subroutine, named C<capture> executes a command with
 the same semantics as Perl's built-in backticks (and C<qx()>):
 
-	use IPC::System::Simple qw(capture);
+    use IPC::System::Simple qw(capture);
 
-	# Capture text while invoking the shell.
-	my $file  = capture("cat /etc/motd");
-	my @lines = capture("cat /etc/passwd");
+    # Capture text while invoking the shell.
+    my $file  = capture("cat /etc/motd");
+    my @lines = capture("cat /etc/passwd");
 
 However unlike regular backticks, which always use the shell, C<capture>
 will bypass the shell when called with multiple arguments:
 
-	# Capture text while avoiding the shell.
-	my $file  = capture("cat", "/etc/motd");
-	my @lines = capture("cat", "/etc/passwd");
+    # Capture text while avoiding the shell.
+    my $file  = capture("cat", "/etc/motd");
+    my @lines = capture("cat", "/etc/passwd");
+
+See also L</runx(), systemx() and capturex()> for a variant of
+C<capture()> that never invokes the shell, even with a single
+argument.
+
+=head2 runx(), systemx() and capturex()
+
+The C<runx()>, C<systemx()> and C<capturex()> commands are identical
+to the multi-argument forms of C<run()>, C<system()> and C<capture()>
+respectively, but I<never> invoke the shell, even when called with a
+single argument.  These forms are particularly useful when a command's
+argument list I<might> be empty, for example:
+
+    systemx($cmd, @args);
+
+The use of C<systemx()> here guarantees that the shell will I<never>
+be invoked, even if C<@args> is empty.
 
 =head2 Exception handling
 
@@ -691,13 +712,13 @@ program with an error.
 
 Capturing the exception is easy:
 
-	eval {
-		run("cat *.txt");
-	};
+    eval {
+        run("cat *.txt");
+    };
 
-	if ($@) {
-		print "Something went wrong - $@\n";
-	}
+    if ($@) {
+        print "Something went wrong - $@\n";
+    }
 
 See the diagnostics section below for more details.
 
