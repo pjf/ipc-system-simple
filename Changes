@@ -3,6 +3,7 @@ Revision history for Perl extension IPC::System::Simple.
 0.14
         - We should now recognise "not implemented on this architecture"
           POSIX errors from Perl 5.11.0
+        - Fixed an invalid specification of resources in META.yml.
 
 0.13  Thu Jul 17 20:36:42 AEST 2008
         - Added examples directory with examples.
