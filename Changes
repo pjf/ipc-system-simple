@@ -1,7 +1,11 @@
 Revision history for Perl extension IPC::System::Simple.
 
 0.15
+        - runx() is now correctly in @EXPORT_OK.  Many thanks
+          to Elliot "clonezone" Shank for spotting this in
+          RT #37793.
 
+        - Added exports test case.
 
 0.14  Sat Jul 19 00:26:01 AEST 2008
         - We should now recognise "not implemented on this architecture"
