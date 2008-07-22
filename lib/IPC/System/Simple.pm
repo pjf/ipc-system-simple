@@ -786,21 +786,22 @@ value of the process:
 
 =head3 $EXITVAL
 
-The exit value of a command executed with either C<run> or
-C<capture> can always be retrieved from the 
-C<$IPC::System::Simple::EXITVAL> variable:
-
-	use IPC::System::Simple qw(capture $EXITVAL);
-
-	my @lines = capture("cat", "/etc/passwd");
-
-	print "Program exited with value $EXITVAL\n";
+The exit value of any command exeucted by C<IPC::System::Simple>
+can always be retrieved from the C<$IPC::System::Simple::EXITVAL>
+variable:
 
 This is particularly useful when inspecting results from C<capture>,
 which returns the captured text from the command.
 
+	use IPC::System::Simple qw(capture $EXITVAL EXIT_ANY);
+
+	my @enemies_defeated = capture(EXIT_ANY, "defeat_evil", "/dev/mordor");
+
+	print "Program exited with value $EXITVAL\n";
+
 C<$EXITVAL> will be set to C<-1> if the command did not exit normally (eg,
-being terminated by a signal) or did not start.
+being terminated by a signal) or did not start.  In this situation an
+exception will also be thrown.
 
 =head2 WINDOWS-SPECIFIC NOTES
 

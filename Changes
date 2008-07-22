@@ -1,6 +1,8 @@
 Revision history for Perl extension IPC::System::Simple.
 
 0.16
+        - Updated documentation on $EXITVAL to provide extra clarification.
+          Many thanks again to Elliot Shank for the feedback!
 
 0.15  Sat Jul 19 23:26:18 PDT 2008
         - runx() is now correctly in @EXPORT_OK.  Many thanks
