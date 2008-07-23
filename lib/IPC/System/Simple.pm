@@ -668,9 +668,11 @@ In fact, you can even have C<IPC::System::Simple> replace the
 default C<system> function for your package so it has the
 same behaviour:
 
-    use IPC::System::Simple qw(simple);
+    use IPC::System::Simple qw(system);
 
     system("cat *.txt");  # system now suceeds or dies!
+
+C<system> and C<run> are aliases to each other.
 
 See also L</runx(), systemx() and capturex()> for variants of
 C<system()> and C<run()> that never invoke the shell, even with
