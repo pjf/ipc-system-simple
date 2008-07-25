@@ -7,6 +7,9 @@ Revision history for Perl extension IPC::System::Simple.
         - Noted that run() and system() are aliases for each other.
           Thanks again for Elliot Shank for the feedback.
 
+        - Fixed a few missing double-quotes in the systemx() documentation.
+          Thanks to Andrew Dent for spotting these!
+
 0.15  Sat Jul 19 23:26:18 PDT 2008
         - runx() is now correctly in @EXPORT_OK.  Many thanks
           to Elliot "clonezone" Shank for spotting this in

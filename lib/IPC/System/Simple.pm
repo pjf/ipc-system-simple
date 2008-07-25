@@ -547,11 +547,11 @@ IPC::System::Simple - Run commands simply, with detailed diagnostics
 
   use IPC::System::Simple qw(system systemx capture capturex);
 
-  system("some_command");       # Command succeeds or dies!
+  system("some_command");        # Command succeeds or dies!
 
-  system("some_command",@args); # Succeeds or dies, avoids shell if @args
+  system("some_command",@args);  # Succeeds or dies, avoids shell if @args
 
-  systemx("some_command,@args); # Succeeds or dies, NEVER uses the shell
+  systemx("some_command",@args); # Succeeds or dies, NEVER uses the shell
 
 
   # Capture the output of a command (just like backticks). Dies on error.
@@ -619,7 +619,7 @@ or process diagnostics, then read on!
 
   system("some_command");
 
-  systemx("some_command, @args);
+  systemx("some_command", @args);
 
   # Run a command which must return 0..5, avoid the shell, and get the
   # exit value (we could also look at $EXITVAL)
