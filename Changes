@@ -1,14 +1,21 @@
 Revision history for Perl extension IPC::System::Simple.
 
 0.16
-        - Updated documentation on $EXITVAL to provide extra clarification.
-          Many thanks again to Elliot Shank for the feedback!
+        * DOCUMENTATION: Updated documentation on $EXITVAL to provide
+          extra clarification.  Many thanks again to Elliot Shank
+          for the feedback!
 
-        - Noted that run() and system() are aliases for each other.
-          Thanks again for Elliot Shank for the feedback.
+        * DOCUMENTATION: Noted that run() and system() are aliases for each
+          other.  Thanks again for Elliot Shank for the feedback.
 
-        - Fixed a few missing double-quotes in the systemx() documentation.
-          Thanks to Andrew Dent for spotting these!
+        * DOCUMENTATION: Fixed a few missing double-quotes in the
+          systemx() documentation.  Thanks to Andrew Dent for spotting these!
+
+        * DOCUMENTATION: Added a feedback section.  If you find this module
+          useful, consider rating it at
+          http://cpanratings.perl.org/rate/?distribution=IPC-System-Simple
+
+        * BUILD: Upgraded to Module::Install 0.77
 
 0.15  Sat Jul 19 23:26:18 PDT 2008
         - runx() is now correctly in @EXPORT_OK.  Many thanks

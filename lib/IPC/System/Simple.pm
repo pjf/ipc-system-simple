@@ -988,6 +988,16 @@ in doubt, report yours anyway.
 Submitting a patch and/or failing test case will greatly expediate
 the fixing of bugs.
 
+=head1 FEEDBACK
+
+If you find this module useful, please consider rating it on the
+CPAN Ratings service at
+L<http://cpanratings.perl.org/rate/?distribution=IPC-System-Simple> .
+
+The module author loves to hear how C<IPC::System::Simple> has made
+your life better (or worse).  Feedback can be sent to
+E<lt>pjf@perltraining.com.auE<gt>.
+
 =head1 SEE ALSO
 
 L<autodie> uses C<IPC::System::Simple> to provide succeed-or-die
