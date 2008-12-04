@@ -3,7 +3,7 @@ Revision history for Perl extension IPC::System::Simple.
         * TEST: Tests to ensure that passing undefined values to
           systemx() do not produce malformed errors, but instead
           well-formed errors.  Many thanks to Nadim Khemir for
-          spottin this.  RT #41149.  
+          spotting this.  RT #41149.  
 
 0.16  Sun Sep 14 11:29:17 AUSEST 2008
         * DOCUMENTATION: Updated documentation on $EXITVAL to provide
