@@ -3,10 +3,12 @@ Revision history for Perl extension IPC::System::Simple.
         * TEST: Tests to ensure that passing undefined values to
           systemx() do not produce malformed errors, but instead
           well-formed errors.  Many thanks to Nadim Khemir for
-          spotting this.  RT #41149.  
+          spotting this.  RT #41149.
 
         * BUGFIX: Workaround for a bug under Perl 5.10 where on
-          some platforms coredumps were not being reported in $?
+          some platforms coredumps were not being reported in $?.
+          Many thanks to the Debian Perl folks for finding this,
+          particularly Gregor Herrmann.
 
         * TEST: Better diagnostics from t/08_core.t.
 
