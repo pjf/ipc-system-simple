@@ -95,15 +95,26 @@ if ($@ =~ UNDEFINED_POSIX_RE) {
 # many systems define it.  Check the POSIX module in the hope that
 # it may actually be there.
 
+
+# TODO: Ideally, $NATIVE_WCOREDUMP should be a constant.
+
+my $NATIVE_WCOREDUMP;
+
 eval { POSIX::WCOREDUMP(1); };
 
 if ($@ =~ UNDEFINED_POSIX_RE) {
 	*WCOREDUMP = sub { $_[0] & 128 };
+        $NATIVE_WCOREDUMP = 0;
 } elsif ($@) {
 	croak sprintf FAIL_POSIX, $@;
 } else {
 	# POSIX actually has it defined!  Huzzah!
 	*WCOREDUMP = \&POSIX::WCOREDUMP;
+        $NATIVE_WCOREDUMP = 1;
+}
+
+sub _native_wcoredump {
+    return $NATIVE_WCOREDUMP;
 }
 
 # system simply calls run
@@ -468,6 +479,16 @@ sub _process_child_error {
 	$EXITVAL = -1;
 
 	my $coredump = WCOREDUMP($child_error);
+
+        # There's a bug in perl 5.10.0 where if the system
+        # does not provide a native WCOREDUMP, then $? will
+        # never contain coredump information.  This code
+        # checks to see if we have the bug, and works around
+        # it if needed.
+
+        if ($] >= 5.010 and not $NATIVE_WCOREDUMP) {
+            $coredump ||= WCOREDUMP( ${^CHILD_ERROR_NATIVE} );
+        }
 
 	if ($child_error == -1) {
 		croak sprintf(FAIL_START, $command, $!);
