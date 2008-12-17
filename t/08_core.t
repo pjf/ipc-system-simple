@@ -41,6 +41,6 @@ SKIP: {
 		run([1],$perl_path, 'signaler.pl', SIGABRT);
 	};
 
-	like($@, qr/died to signal/);
-	like($@, qr/dumped core/);
+	like($@, qr/died to signal/, "Signal caught,   \$? = $?");
+	like($@, qr/dumped core/,    "Coredump caught, \$? = $?");
 }

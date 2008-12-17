@@ -8,6 +8,8 @@ Revision history for Perl extension IPC::System::Simple.
         * BUGFIX: Workaround for a bug under Perl 5.10 where on
           some platforms coredumps were not being reported in $?
 
+        * TEST: Better diagnostics from t/08_core.t.
+
 0.16  Sun Sep 14 11:29:17 AUSEST 2008
         * DOCUMENTATION: Updated documentation on $EXITVAL to provide
           extra clarification.  Many thanks again to Elliot Shank
