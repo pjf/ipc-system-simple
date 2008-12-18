@@ -28,6 +28,7 @@ t/10_formatting.t
 t/11_newlines.t
 t/12_systemx.t
 t/13_exports.t
+t/14_uninitialised.t
 t/critic.t
 t/exiter.pl
 t/internal.t
