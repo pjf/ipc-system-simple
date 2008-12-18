@@ -6,15 +6,11 @@ use Config;
 use constant SIGABRT => 6;
 
 BEGIN {
-	if (not $ENV{TEST_AUTHOR}) {
-		plan skip_all => 'Author test.  Set $ENV{TEST_AUTHOR} to true to run.'
-	} 
+    eval { require BSD::Resource; BSD::Resource->import() };
 
-	eval { require BSD::Resource; BSD::Resource->import() };
-
-	if ($@) {
-		plan skip_all => "BSD::Resource required for coredump tests";
-	} 
+    if ($@) {
+        plan skip_all => "BSD::Resource required for coredump tests";
+    } 
 }
 
 plan tests => 3;
