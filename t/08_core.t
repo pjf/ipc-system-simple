@@ -43,4 +43,6 @@ SKIP: {
 
 	like($@, qr/died to signal/, "Signal caught,   \$? = $?");
 	like($@, qr/dumped core/,    "Coredump caught, \$? = $?");
+
+        unlink('core');     # Clean up our core file, if it exists.
 }
