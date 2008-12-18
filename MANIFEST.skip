@@ -9,3 +9,5 @@ blib
 Makefile$
 Makefile.old
 IPC-System-Simple-.*.tar.gz
+t/cover_db
+cover_db
