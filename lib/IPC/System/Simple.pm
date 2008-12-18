@@ -39,6 +39,8 @@ use constant FAIL_TAINT_ENV => q{%s called with tainted environment $ENV{%s}};
 use constant FAIL_SIGNAL    => q{"%s" died to signal "%s" (%d)%s};
 use constant FAIL_BADEXIT   => q{"%s" unexpectedly returned exit value %d};
 
+use constant FAIL_UNDEF     => q{%s called with undefined command};
+
 use constant FAIL_POSIX     => q{IPC::System::Simple does not understand the POSIX error '%s'.  Please check http://search.cpan.org/perldoc?IPC::System::Simple to see if there is an updated version.  If not please report this as a bug to http://rt.cpan.org/Public/Bug/Report.html?Queue=IPC-System-Simple};
 
 # On Perl's older than 5.8.x we can't assume that there'll be a
@@ -552,6 +554,10 @@ sub _process_args {
 
 	my $command = shift(@_);
 
+        if (not defined $command) {
+                croak sprintf( FAIL_UNDEF, $caller );
+        }
+
 	return ($valid_returns,$command,@_);
 
 }
@@ -914,6 +920,12 @@ You've found a bug in C<IPC::System::Simple>.  Please check to
 see if an updated version of C<IPC::System::Simple> is available.
 If not, please file a bug report according to the L</Reporting bugs> section
 below.
+
+=item IPC::System::Simple::%s called with undefined command
+
+You've passed the undefined value as a command to be executed.
+While this is a very Zen-like action, it's not supported by
+Perl's current implementation.
 
 =back
 

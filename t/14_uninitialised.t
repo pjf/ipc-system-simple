@@ -14,21 +14,9 @@ plan 'no_plan';
 # Passing undef to system functions should produce a nice message,
 # not a warning and a malformed message.
 
-TODO: {
-    local $TODO = "Checking for undef not yet implemented";
 
-    eval {
-        systemx(undef,1);
-    };
+eval {
+    systemx(undef,1);
+};
 
-    like($@, qr/undef/, "systemx() should check for undef");
-
-    # We call had_no_warnings manually so it can be marked
-    # as a to-do test.
-    had_no_warnings();
-
-}
-
-# Since we manually tested our warnings, we clear them
-# before script exit.
-clear_warnings();
+like($@, qr/undef/, "systemx() should check for undef");

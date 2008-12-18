@@ -18,6 +18,9 @@ Revision history for Perl extension IPC::System::Simple.
         * TEST: t/08_core.t is now a main test, rather than an
           author-only test.
 
+        * BUGFIX: Attempting to call an undefined command is now
+          a fatal error.
+
 0.16  Sun Sep 14 11:29:17 AUSEST 2008
         * DOCUMENTATION: Updated documentation on $EXITVAL to provide
           extra clarification.  Many thanks again to Elliot Shank
