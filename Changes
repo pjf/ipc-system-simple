@@ -1,7 +1,6 @@
 Revision history for Perl extension IPC::System::Simple.
 
-1.00  Fri Dec 19 00:41:56 AUSEDT 2008
-
+1.17  Fri Dec 19 00:45:16 AUSEDT 2008
         * TEST: Tests to ensure that passing undefined values to
           systemx() do not produce malformed errors, but instead
           well-formed errors.  Many thanks to Nadim Khemir for
@@ -22,6 +21,14 @@ Revision history for Perl extension IPC::System::Simple.
 
         * BUGFIX: Attempting to call an undefined command is now
           a fatal error.
+
+        * VERSION: Since ISS is now very stable, and provides a
+          significantly improved interface to the default system()
+          command, the major version number has been incremented.
+
+          There are no incompatible changes with previous version.
+          The increment of the major version number is to indicate
+          stability only.
 
 0.16  Sun Sep 14 11:29:17 AUSEST 2008
         * DOCUMENTATION: Updated documentation on $EXITVAL to provide
