@@ -673,7 +673,7 @@ or process diagnostics, then read on!
 
   my @lines  = capturex([0..5], "some_command", @args);
 
-=head1 ADVNACED USAGE
+=head1 ADVANCED USAGE
 
 =head2 run() and system()
 
