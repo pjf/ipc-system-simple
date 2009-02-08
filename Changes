@@ -1,5 +1,15 @@
 Revision history for Perl extension IPC::System::Simple.
 
+1.18  Sun Feb  8 19:09:15 AUSEDT 2009
+
+        * BUGFIX: IPC::System::Simple should now compile cleanly
+          under 5.6.0 and 5.6.1 (as well as 5.6.2+).  Many thanks
+          to David Golden for spotting this bug.  (RT #43098)
+
+        * DOCUMENTATION: "Advanced" is now spelt correctly under
+          in the section "Advanced Usage".  Many thanks to
+          Raymond Wan for spotting this typo.  (RT #42705)
+
 1.17  Fri Dec 19 00:45:16 AUSEDT 2008
         * TEST: Tests to ensure that passing undefined values to
           systemx() do not produce malformed errors, but instead

@@ -84,7 +84,7 @@ our @EXPORT_OK = qw(
     $EXITVAL EXIT_ANY
 );
 
-our $VERSION = '1.17';
+our $VERSION = '1.18';
 our $EXITVAL = -1;
 
 my @Signal_from_number = split(' ', $Config{sig_name});
