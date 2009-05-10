@@ -223,12 +223,12 @@ sub capture {
 
     if ($wantarray) {
         my @results = qx($command);
-        _process_child_error($?,$command,$valid_returns);
+        succeed_or_die($?, {command=>$command, args=>\@args, allowable_returns=>$valid_returns});
         return @results;
     }
 
     my $results = qx($command);
-    _process_child_error($?,$command,$valid_returns);
+    succeed_or_die($?, {command=>$command, args=>\@args, allowable_returns=>$valid_returns});
     return $results;
 }
 
