@@ -10,6 +10,7 @@ inc/Module/Install/Metadata.pm
 inc/Module/Install/Win32.pm
 inc/Module/Install/WriteAll.pm
 lib/IPC/System/Simple.pm
+lib/IPC/System/Simple/Exception.pm
 LICENSE
 Makefile.PL
 MANIFEST
