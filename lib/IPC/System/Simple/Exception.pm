@@ -188,7 +188,7 @@ sub started_ok    { $_[0]->{started_ok}    }
 sub signal_name {
     my $this = shift;
 
-    $Signal_from_number[$this->{signal_nmber}] || "UNKNOWN";
+    $Signal_from_number[$this->{signal_number}] || "UNKNOWN";
 }
 
 sub child_error       { $_[0]->{child_error} }
