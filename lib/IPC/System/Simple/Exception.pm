@@ -23,12 +23,14 @@ our %DEFAULTS = (
     allowable_returns => [0],
 );
 
+my $USEDBY = "IPC::System::Simple";
+sub import { $USEDBY = caller }
+
 sub new {
     my $class = shift;
     my $this = bless {%DEFAULTS}, $class;
 
     my ($package, $file, $line, $sub);
-    my $caller = caller; # caller is usually IPC::System::Simple or something derived from it
 
     my $depth = 0;
     while (1) {
@@ -38,7 +40,7 @@ sub new {
         # Skip up the call stack until we find something outside
         # of the caller, $class or eval space
 
-        next if $package->isa($caller);
+        next if $package->isa($USEDBY);
         next if $package->isa($class);
         next if $package->isa(__PACKAGE__);
         next if $file =~ /^\(eval\s\d+\)$/;
@@ -71,7 +73,7 @@ sub new {
     $this->{line}     = $line;
     $this->{caller}   = $sub;
 
-    warn "DEBUG(caller: $caller, package: $package, file: $file, line: $line; caller: $caller)";
+    warn "DEBUG(usedby: $USEDBY, package: $package, file: $file, line: $line)";
 
     $this->set(@_);
 }
