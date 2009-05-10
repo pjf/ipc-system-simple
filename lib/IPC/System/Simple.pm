@@ -157,7 +157,7 @@ sub run {
         # so we do so.
 
 	if (@args) {
-                return systemx($valid_returns, $command, @args);
+        return systemx($valid_returns, $command, @args);
 	}
 
         # Without arguments, we're calling system, and checking
