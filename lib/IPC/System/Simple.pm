@@ -79,7 +79,7 @@ use constant UNDEFINED_POSIX_RE => qr{not (?:defined|a valid) POSIX macro|not im
 require Exporter;
 our @ISA = qw(Exporter);
 
-our @EXPORT_OK = qw( 
+our @EXPORT_OK = qw(
     capture  capturex
     run      runx
     system   systemx
@@ -153,23 +153,23 @@ sub run {
 
 	my ($valid_returns, $command, @args) = _process_args(@_);
 
-        # If we have arguments, we really want to call systemx,
-        # so we do so.
+    # If we have arguments, we really want to call systemx,
+    # so we do so.
 
 	if (@args) {
         return systemx($valid_returns, $command, @args);
 	}
 
-        # Without arguments, we're calling system, and checking
-        # the results.
+    # Without arguments, we're calling system, and checking
+    # the results.
 
 	# We're throwing our own exception on command not found, so
 	# we don't need a warning from Perl.
 
-	no warnings 'exec';		## no critic
-	CORE::system($command,@args);
+	no warnings 'exec';	## no critic
+	CORE::system($command, @args);
 
-	return _process_child_error($?,$command,$valid_returns);
+	return succeed_or_die($?, {command=>$command, args=>\@args, allowable_returns=>$valid_returns});
 }
 
 # runx is just like system/run, but *never* invokes the shell.
@@ -195,8 +195,7 @@ sub runx {
     no warnings; ## no critic
 
     CORE::system { $command } $command, @args;
-
-    return _process_child_error($?, $command, $valid_returns);
+	return succeed_or_die($?, {command=>$command, args=>\@args, allowable_returns=>$valid_returns});
 }
 
 # capture is our way of running a process with backticks/qx semantics
@@ -206,14 +205,14 @@ sub capture {
 
 	my ($valid_returns, $command, @args) = _process_args(@_);
 
-        if (@args) {
-            return capturex($valid_returns, $command, @args);
-        }
+    if (@args) {
+        return capturex($valid_returns, $command, @args);
+    }
 
-        if (WINDOWS) {
-            # USE_SHELL really means "You may use the shell if you need it."
-            return _win32_capture(USE_SHELL, $valid_returns, $command, @args);
-        }
+    if (WINDOWS) {
+        # USE_SHELL really means "You may use the shell if you need it."
+        return _win32_capture(USE_SHELL, $valid_returns, $command, @args);
+    }
 
 	our $EXITVAL = -1;
 
@@ -222,15 +221,15 @@ sub capture {
 	# We'll produce our own warnings on failure to execute.
 	no warnings 'exec';	## no critic
 
-        if ($wantarray) {
-                my @results = qx($command);
-                _process_child_error($?,$command,$valid_returns);
-                return @results;
-        } 
-
-        my $results = qx($command);
+    if ($wantarray) {
+        my @results = qx($command);
         _process_child_error($?,$command,$valid_returns);
-        return $results;
+        return @results;
+    }
+
+    my $results = qx($command);
+    _process_child_error($?,$command,$valid_returns);
+    return $results;
 }
 
 # _win32_capture implements the capture and capurex commands on Win32.
@@ -261,7 +260,7 @@ sub _win32_capture {
         open(my $saved_stdout, '>&', \*STDOUT)  ## no critic
                 or croak sprintf(FAIL_PLUMBING, "Can't dup STDOUT", $!);
 
-        # We now open up a pipe that will allow us to	
+        # We now open up a pipe that will allow us to
         # communicate with the new process.
 
         pipe(my ($read_fh, $write_fh))
@@ -417,7 +416,7 @@ sub capturex {
 	my $results = join("",<$pipe>);
 	close($pipe);
 	_process_child_error($?,$command,$valid_returns);
-	
+
 	return $results;
 
 }
@@ -498,7 +497,7 @@ sub _check_taint {
 
 sub _process_child_error {
 	my ($child_error, $command, $valid_returns) = @_;
-	
+
 	$EXITVAL = -1;
 
 	my $coredump = WCOREDUMP($child_error);
@@ -525,7 +524,7 @@ sub _process_child_error {
 		my $signal_no = WTERMSIG( $child_error );
 
         return IPC::System::Simple::Exception->fail_signal(signal_number=>$signal_no, coredump=>$coredump);
-	} 
+	}
 
     return IPC::System::Simple::Exception->fail_internal;
 }
@@ -545,7 +544,7 @@ sub _check_exit {
 
 	if (not defined first { $_ == $exitval } @$valid_returns) {
 		return IPC::System::Simple::Exception->fail_badexit(exitval=>$exitval);
-	}	
+	}
 
     return IPC::System::Simple::Exception->success(exitval=>$exitval);
 }
@@ -598,7 +597,7 @@ sub succeed_or_die {
     our $EXITVAL;
 
     $status->is_success or $status->throw;
-    
+
     return $EXITVAL = $status->exit_value;
 }
 
@@ -636,13 +635,13 @@ IPC::System::Simple - Run commands simply, with detailed diagnostics
 
 =head1 DESCRIPTION
 
-Calling Perl's in-built C<system()> function is easy, 
+Calling Perl's in-built C<system()> function is easy,
 determining if it was successful is I<hard>.  Let's face it,
 C<$?> isn't the nicest variable in the world to play with, and
 even if you I<do> check it, producing a well-formatted error
 string takes a lot of work.
 
-C<IPC::System::Simple> takes the hard work out of calling 
+C<IPC::System::Simple> takes the hard work out of calling
 external commands.  In fact, if you want to be really lazy,
 you can just write:
 
@@ -699,14 +698,14 @@ or process diagnostics, then read on!
 
   # Capture output into $result and throw exception on failure
 
-  my $result = capture("some_command");	
+  my $result = capture("some_command");
 
   # Check exit value from captured command
 
   print "some_command exited with status $EXITVAL\n";
 
   # Captures into @lines, splitting on $/
-  my @lines = capture("some_command"); 
+  my @lines = capture("some_command");
 
   # Run a command which must return 0..5, capture the output into
   # @lines, and avoid the shell.
@@ -995,7 +994,7 @@ hard work for you.
 If an odd exit status is provided, you're informed of what it is.  If
 a signal kills your process, you are informed of both its name and
 number.  If tainted data or environment prevents your command from
-running, you are informed of exactly which datais 
+running, you are informed of exactly which datais
 
 =item Exceptions on failure
 
@@ -1042,7 +1041,7 @@ Signals are not supported under Win32 systems, since they don't
 work at all like Unix signals.  Win32 singals cause commands to
 exit with a given exit value, which this modules I<does> capture.
 
-Only 8-bit values are returned when C<run()> or C<system()> 
+Only 8-bit values are returned when C<run()> or C<system()>
 is called with a single value under Win32.  Multi-argument calls
 to C<run()> and C<system()>, as well as the C<runx()> and
 C<systemx()> always return the 32-bit Windows return values.
