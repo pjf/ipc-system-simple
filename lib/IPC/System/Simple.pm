@@ -583,6 +583,38 @@ sub _process_args {
 
 }
 
+# my $status = process_child_error($?, {
+# 	command => $cmd,
+# 	args    => \@args,
+# 	allowable_returns => \@returns,
+# 	...,
+# });
+
+# $status->is_success;		# Boolean
+# $status->exit_value;
+# $status->signal_number;
+# $status->signal_name;
+# $status->dumped_core;		# Boolean
+# $status->started_ok;		# Boolean
+# $status->stringify;		# Human friendly string
+# $status->throw;			# Throw the object as an exception
+# 
+# # Inspect how we were originally called.
+# 
+# $status->child_error;		# $? or equiv
+# $status->command;
+# $status->args;
+# $status->allowable_returns;
+
+sub succeed_or_die {
+    my $status = process_child_error(@_);
+    our $EXITVAL;
+
+    $status->is_success or $status->throw;
+    
+    return $EXITVAL = $status->exit_value;
+}
+
 1;
 
 __END__
