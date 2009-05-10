@@ -352,13 +352,15 @@ sub capturex {
 	# the pipe closes without data.
 
 	pipe(my ($read_fh, $write_fh))
-		or croak sprintf(FAIL_PLUMBING, "Can't create pipe", $!);
+		or croak IPC::System::Simple::Exception->fail_plumbing(
+            caa=>[$command, \@args, $valid_returns], internal_errstr=>"can't create pipe", errstr=>"$!" );
 
 	# This next line also does an implicit fork.
 	my $pid = open(my $pipe, '-|');	 ## no critic
 
 	if (not defined $pid) {
-		croak sprintf(FAIL_START, $command, $!);
+		croak IPC::System::Simple::Exception->fail_start( caa=>[$command, \@args, $valid_returns], errstr=>"$!" );
+
 	} elsif (not $pid) {
 		# Child process, execs command.
 
@@ -395,7 +397,7 @@ sub capturex {
 			# Setting $! to our child error number gives
 			# us nice looking strings when printed.
 			local $! = $error;
-			croak sprintf(FAIL_START, $command, $!);
+            croak IPC::System::Simple::Exception->fail_start( caa=>[$command, \@args, $valid_returns], errstr=>"$!" );
 		}
 	}
 
@@ -405,7 +407,7 @@ sub capturex {
 	if ($wantarray) {
 		my @results = <$pipe>;
 		close($pipe);
-		_process_child_error($?,$command,$valid_returns);
+        succeed_or_die($?, {command=>$command, args=>\@args, allowable_returns=>$valid_returns});
 		return @results;
 	}
 
@@ -415,7 +417,7 @@ sub capturex {
 
 	my $results = join("",<$pipe>);
 	close($pipe);
-	_process_child_error($?,$command,$valid_returns);
+    succeed_or_die($?, {command=>$command, args=>\@args, allowable_returns=>$valid_returns});
 
 	return $results;
 
@@ -513,7 +515,7 @@ sub _process_child_error {
         }
 
 	if ($child_error == -1) {
-        return IPC::System::Simple::Exception->fail_start(errstr=>$!);
+        return IPC::System::Simple::Exception->fail_start(errstr=>"$!");
 
 	} elsif ( WIFEXITED( $child_error ) ) {
 		$EXITVAL = WEXITSTATUS( $child_error );
