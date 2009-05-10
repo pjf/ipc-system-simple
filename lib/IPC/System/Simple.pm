@@ -11,6 +11,8 @@ use Config;
 use constant WINDOWS => ($^O eq 'MSWin32');
 use constant VMS     => ($^O eq 'VMS');
 
+use IPC::System::Simple::Exception;
+
 BEGIN {
 
     # It would be lovely to use the 'if' module here, but it didn't
@@ -585,9 +587,8 @@ sub process_child_error {
     $opts->{allowable_returns} = delete $opts->{valid_returns} if exists $opts->{valid_returns};
     $opts->{allowable_returns} ||= [ 0 ];
 
-	my ($child_error, $command, $valid_returns) = @_;
     my $status = _process_child_error($child_error, $opts->{command}, $opts->{allowable_returns});
-       $status->set( %$opts );
+       $status->set( %$opts, child_error=>$child_error );
 
     return $status;
 }
