@@ -12,6 +12,7 @@ use constant ISSE_FSTART    => 2;
 use constant ISSE_FSIGNAL   => 3;
 use constant ISSE_FINTERNAL => 4;
 use constant ISSE_FBADEXIT  => 5;
+use constant ISSE_FPLUMBING => 6;
 
 my @Signal_from_number = split(' ', $Config{sig_name});
 
@@ -121,6 +122,17 @@ sub fail_badexit {
         type     => ISSE_FBADEXIT,
         format   => '"*C" unexpectedly returned exit value %d', # *C is the command
         fmt_args => [qw(exit_value)],
+    );
+
+    $this;
+}
+
+sub fail_plumbing {
+    my $class = shift;
+    my $this  = $class->new(@_,
+        type     => ISSE_FPLUMBING,
+        format   => 'Error in IPC::System::Simple plumbing: "%s" - "%s"',
+        fmt_args => [qw(internal_errstr errorstr)],
     );
 
     $this;
