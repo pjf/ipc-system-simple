@@ -40,3 +40,5 @@ t/pod.t
 t/pod_coverage.t
 t/signaler.pl
 t/win32.t
+'t/dir with spaces/hello.c'
+'t/dir with spaces/hello.exe'
