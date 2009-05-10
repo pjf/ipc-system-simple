@@ -162,11 +162,6 @@ sub throw {
     croak $this;
 }
 
-sub _at_line {
-    my $this = shift;
-
-}
-
 sub stringify {
     my $this = shift;
 
