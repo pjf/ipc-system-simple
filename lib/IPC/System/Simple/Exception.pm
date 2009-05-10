@@ -71,7 +71,7 @@ sub new {
     $this->{line}     = $line;
     $this->{caller}   = $sub;
 
-    warn "DEBUG(package: $package, file: $file, line: $line; caller: $caller)";
+    warn "DEBUG(caller: $caller, package: $package, file: $file, line: $line; caller: $caller)";
 
     $this->set(@_);
 }
