@@ -148,6 +148,10 @@ sub success {
 sub set {
     my ($this, %opts) = @_;
 
+    if( my $ar = delete $opts{caa} ) {
+        @opts{qw(command args allowable_returns)} = @$ar;
+    }
+
     @$this{keys %opts} = values %opts;
     $this
 }
