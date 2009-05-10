@@ -87,8 +87,6 @@ our @EXPORT_OK = qw(
 our $VERSION = '1.18';
 our $EXITVAL = -1;
 
-my @Signal_from_number = split(' ', $Config{sig_name});
-
 # Environment variables we don't want to see tainted.
 my @Check_tainted_env = qw(PATH IFS CDPATH ENV BASH_ENV);
 if (WINDOWS) {
@@ -514,7 +512,7 @@ sub _process_child_error {
         }
 
 	if ($child_error == -1) {
-		croak sprintf(FAIL_START, $command, $!);
+        return IPC::System::Simple::Exception->fail_start(errstr=>$!);
 
 	} elsif ( WIFEXITED( $child_error ) ) {
 		$EXITVAL = WEXITSTATUS( $child_error );
@@ -522,16 +520,12 @@ sub _process_child_error {
 		return _check_exit($command,$EXITVAL,$valid_returns);
 
 	} elsif ( WIFSIGNALED( $child_error ) ) {
-		my $signal_no   = WTERMSIG( $child_error );
-		my $signal_name = $Signal_from_number[$signal_no] || "UNKNOWN";
+		my $signal_no = WTERMSIG( $child_error );
 
-		croak sprintf FAIL_SIGNAL, $command, $signal_name, $signal_no, ($coredump ? " and dumped core" : "");
-
-
+        return IPC::System::Simple::Exception->fail_signal(signal_number=>$signal_no, coredump=>$coredump);
 	} 
 
-	croak sprintf(FAIL_INTERNAL, qq{'$command' ran without exit value or signal});
-
+    return IPC::System::Simple::Exception->fail_internal;
 }
 
 # A simple subroutine for checking exit values.  Results in better
@@ -544,13 +538,14 @@ sub _check_exit {
 	# If we have a single-value list consisting of the EXIT_ANY
 	# value, then we're happy with whatever exit value we're given.
 	if (@$valid_returns == 1 and $valid_returns->[0] == EXIT_ANY_CONST) {
-		return $exitval;
+		return IPC::System::Simple::Exception->success(exitval=>$exitval);
 	}
 
 	if (not defined first { $_ == $exitval } @$valid_returns) {
-		croak sprintf FAIL_BADEXIT, $command, $exitval;
+		return IPC::System::Simple::Exception->fail_badexit(exitval=>$exitval);
 	}	
-	return $exitval;
+
+    return IPC::System::Simple::Exception->success(exitval=>$exitval);
 }
 
 
@@ -580,7 +575,21 @@ sub _process_args {
         }
 
 	return ($valid_returns,$command,@_);
+}
 
+sub process_child_error {
+    my ($child_error, $opts) = @_;
+
+    $opts->{command} or croak "command not specified";
+    $opts->{args} ||= [];        # personally, I'm likely to screw this up:
+    $opts->{allowable_returns} = delete $opts->{valid_returns} if exists $opts->{valid_returns};
+    $opts->{allowable_returns} ||= [ 0 ];
+
+	my ($child_error, $command, $valid_returns) = @_;
+    my $status = _process_child_error($child_error, $opts->{command}, $opts->{allowable_returns});
+       $status->set( %$opts );
+
+    return $status;
 }
 
 # my $status = process_child_error($?, {
