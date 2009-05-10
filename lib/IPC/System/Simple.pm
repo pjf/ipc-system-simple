@@ -352,14 +352,14 @@ sub capturex {
 	# the pipe closes without data.
 
 	pipe(my ($read_fh, $write_fh))
-		or croak IPC::System::Simple::Exception->fail_plumbing(
-            caa=>[$command, \@args, $valid_returns], internal_errstr=>"can't create pipe", errstr=>"$!" );
+		or IPC::System::Simple::Exception->fail_plumbing(
+            caa=>[$command, \@args, $valid_returns], internal_errstr=>"can't create pipe", errstr=>"$!" )->throw;
 
 	# This next line also does an implicit fork.
 	my $pid = open(my $pipe, '-|');	 ## no critic
 
 	if (not defined $pid) {
-		croak IPC::System::Simple::Exception->fail_start( caa=>[$command, \@args, $valid_returns], errstr=>"$!" );
+		IPC::System::Simple::Exception->fail_start( caa=>[$command, \@args, $valid_returns], errstr=>"$!" )->throw;
 
 	} elsif (not $pid) {
 		# Child process, execs command.
@@ -397,7 +397,7 @@ sub capturex {
 			# Setting $! to our child error number gives
 			# us nice looking strings when printed.
 			local $! = $error;
-            croak IPC::System::Simple::Exception->fail_start( caa=>[$command, \@args, $valid_returns], errstr=>"$!" );
+            IPC::System::Simple::Exception->fail_start( caa=>[$command, \@args, $valid_returns], errstr=>"$!" )->throw;
 		}
 	}
 
