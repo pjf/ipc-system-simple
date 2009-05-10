@@ -30,7 +30,7 @@ our %DEFAULTS = (
 );
 
 my $USEDBY = "IPC::System::Simple";
-sub import { $USEDBY = caller }
+sub import { $USEDBY = caller; return }
 
 sub new {
     my $class = shift;
@@ -79,7 +79,7 @@ sub new {
     $this->{line}     = $line;
     $this->{caller}   = $sub;
 
-    $this->set(@_);
+    return $this->set(@_);
 }
 
 sub fail_start {
@@ -91,7 +91,7 @@ sub fail_start {
         fmt_args   => [qw(errstr)],
     );
 
-    $this;
+    return $this;
 }
 
 sub fail_signal {
@@ -102,7 +102,7 @@ sub fail_signal {
         fmt_args => [qw/signal_name() signal_number _corestr()/],
     );
 
-    $this;
+    return $this;
 }
 
 sub fail_internal {
@@ -113,7 +113,7 @@ sub fail_internal {
         fmt_args => [qw/errstr/],
     );
 
-    $this;
+    return $this;
 }
 
 sub fail_badexit {
@@ -124,7 +124,7 @@ sub fail_badexit {
         fmt_args => [qw(exit_value)],
     );
 
-    $this;
+    return $this;
 }
 
 sub fail_plumbing {
@@ -135,14 +135,14 @@ sub fail_plumbing {
         fmt_args => [qw(internal_errstr errorstr)],
     );
 
-    $this;
+    return $this;
 }
 
 sub success {
     my $class = shift;
     my $this  = $class->new(@_, type=>ISSE_SUCCESS);
 
-    $this;
+    return $this;
 }
 
 sub set {
@@ -153,7 +153,7 @@ sub set {
     }
 
     @$this{keys %opts} = values %opts;
-    $this
+    return $this
 }
 
 sub throw {
@@ -191,26 +191,28 @@ sub is_success {
     return;
 }
 
-sub exit_value    { $_[0]->{exit_value}    }
-sub signal_number { $_[0]->{signal_number} }
-sub dumped_core   { $_[0]->{coredump}      }
-sub started_ok    { $_[0]->{started_ok}    }
+sub exit_value    { return $_[0]->{exit_value}    }
+sub signal_number { return $_[0]->{signal_number} }
+sub dumped_core   { return $_[0]->{coredump}      }
+sub started_ok    { return $_[0]->{started_ok}    }
 
 sub signal_name {
     my $this = shift;
 
-    $Signal_from_number[$this->{signal_number}] || "UNKNOWN";
+    return ($Signal_from_number[$this->{signal_number}] || "UNKNOWN");
 }
 
-sub child_error       { $_[0]->{child_error} }
-sub command           { $_[0]->{command} }
-sub args              { wantarray ? @{$_[0]->{args}} : $_[0]->{args} }
-sub allowable_returns { wantarray ? @{$_[0]->{allowable_returns}} : $_[0]->{allowable_returns} }
+sub child_error       { return $_[0]->{child_error} }
+sub command           { return $_[0]->{command} }
+sub args              { return (wantarray ? @{$_[0]->{args}} : $_[0]->{args}) }
+sub allowable_returns { return (wantarray ? @{$_[0]->{allowable_returns}} : $_[0]->{allowable_returns}) }
 
-sub function { $_[0]->{function} }
-sub file     { $_[0]->{file}     }
-sub package  { $_[0]->{package}  }
-sub caller   { $_[0]->{caller}   }
+sub function { return $_[0]->{function} }
+sub file     { return $_[0]->{file}     }
+sub package  { return $_[0]->{package}  } ## no critic
+sub caller   { return $_[0]->{caller}   } ## no critic
 
-sub type     { $_[0]->{type} }
-sub _corestr { $_[0]->{coredump} ? " and dumped core" : "" }
+sub type     { return $_[0]->{type} }
+sub _corestr { return ($_[0]->{coredump} ? " and dumped core" : "") }
+
+1;
