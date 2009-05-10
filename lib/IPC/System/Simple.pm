@@ -526,7 +526,7 @@ sub _process_child_error {
         return IPC::System::Simple::Exception->fail_signal(signal_number=>$signal_no, coredump=>$coredump);
 	}
 
-    return IPC::System::Simple::Exception->fail_internal(errstr=>q{"%C" ran without exit value or signal});
+    return IPC::System::Simple::Exception->fail_internal(errstr=>q{"*C" ran without exit value or signal});
 }
 
 # A simple subroutine for checking exit values.  Results in better
