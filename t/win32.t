@@ -2,7 +2,7 @@
 use strict;
 use Test::More;
 use File::Basename qw(fileparse);
-use IPC::System::Simple qw(run capture $EXITVAL);
+use IPC::System::Simple qw(run capture $EXITVAL capturex);
 use Config;
 
 BEGIN {
@@ -23,7 +23,11 @@ use constant HUGE_EXIT => 100_000;
 # This command should allow us to exit with a specific value.
 use constant EXIT_CMD => [ @{ &IPC::System::Simple::WINDOWS_SHELL }, 'exit'];
 
-plan tests => 28;
+# These are used in the testing of commands in paths which contain spaces.
+use constant CMD_WITH_SPACES        => 'dir with spaces\hello.exe';
+use constant CMD_WITH_SPACES_OUTPUT => "Hello World\n";
+
+plan tests => 32;
 
 my $perl_path = $Config{perlpath};
 $perl_path .= $Config{_exe} unless $perl_path =~ m/$Config{_exe}$/i;
@@ -112,3 +116,21 @@ ok(1,"perl found in multi-part path");
 
 run($raw_perl,"-e1");
 ok(1,"raw perl found in multi-part path");
+
+# Check to ensure we can run commands that include spaces.
+
+SKIP: {
+
+    skip(CMD_WITH_SPACES." not available", 2) unless -x CMD_WITH_SPACES;
+
+    my $output = eval { capturex(CMD_WITH_SPACES); };
+
+    is($@, "", "command with spaces should not error (capturex)");
+    is($output, CMD_WITH_SPACES_OUTPUT, "...and give correct output");
+
+    my $output = eval { capture(CMD_WITH_SPACES); };
+
+    is($@, "", "command with spaces should not error (capture)");
+    is($output, CMD_WITH_SPACES_OUTPUT, "...and give correct output");
+
+}
