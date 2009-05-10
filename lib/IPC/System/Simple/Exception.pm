@@ -4,7 +4,7 @@ use strict;
 use warnings;
 use Carp;
 use Config;
-use overload '""' => "stringify";
+use overload '""' => "stringify", "0+" => "stringify";
 
 use constant ISSE_UNKNOWN   => 0;
 use constant ISSE_SUCCESS   => 1;
@@ -23,6 +23,8 @@ our %DEFAULTS = (
     command           => "unknown",
     function          => "unknown",
     args              => [],
+    format            => 'unknown error',
+    fmt_args          => [],
     allowable_returns => [0],
 );
 
@@ -76,35 +78,50 @@ sub new {
     $this->{line}     = $line;
     $this->{caller}   = $sub;
 
-    warn "DEBUG(usedby: $USEDBY, package: $package, file: $file, line: $line)";
-
     $this->set(@_);
 }
 
 sub fail_start {
     my $class = shift;
-    my $this  = $class->new(@_, started_ok=>undef, type=>ISSE_FSTART);
+    my $this  = $class->new(@_,
+        started_ok => undef,
+        type       => ISSE_FSTART,
+        format     => '"*C" failed to start: "%s"', # *C is the command
+        fmt_args   => [qw(errstr)],
+    );
 
     $this;
 }
 
 sub fail_signal {
     my $class = shift;
-    my $this  = $class->new(@_, type=>ISSE_FSIGNAL);
+    my $this  = $class->new(@_,
+        type     => ISSE_FSIGNAL,
+        format   => '"*C" died to signal "%s" (%d)%s', # *C is the command
+        fmt_args => [qw/signal_name() signal_number _corestr()/],
+    );
 
     $this;
 }
 
 sub fail_internal {
     my $class = shift;
-    my $this  = $class->new(@_, type=>ISSE_FINTERNAL);
+    my $this  = $class->new(@_,
+        type     => ISSE_FINTERNAL,
+        format   => 'Internal error in *U: %s', # *U is the USEDBY pacakge name
+        fmt_args => [qw/errstr/],
+    );
 
     $this;
 }
 
 sub fail_badexit {
     my $class = shift;
-    my $this  = $class->new(@_, type=>ISSE_FBADEXIT);
+    my $this  = $class->new(@_,
+        type     => ISSE_FBADEXIT,
+        format   => '"*C" unexpectedly returned exit value %d', # *C is the command
+        fmt_args => [qw(exit_value)],
+    );
 
     $this;
 }
@@ -129,8 +146,31 @@ sub throw {
     croak $this;
 }
 
+sub _at_line {
+    my $this = shift;
+
+}
+
 sub stringify {
-    "blah blah blah"
+    my $this = shift;
+
+    return $this->exit_value if $this->is_success;
+
+    my $error = sprintf($this->{format}, map {
+            my $res;
+
+            if( m/^(.+?)\(\)$/ ) { $res = $this->$1() }
+            else                 { $res = $this->{$_} }
+
+            $res;
+
+    } @{$this->{fmt_args}});
+
+    my @c = ($this->{command}, @{$this->{args}});
+    $error =~ s/\*C/@c/g;
+    $error =~ s/\*U/$USEDBY/g;
+
+    return $error . " at $this->{file} line $this->{line}";
 }
 
 sub is_success {
@@ -162,3 +202,4 @@ sub package  { $_[0]->{package}  }
 sub caller   { $_[0]->{caller}   }
 
 sub type     { $_[0]->{type} }
+sub _corestr { $_[0]->{coredump} ? " and dumped core" : "" }
