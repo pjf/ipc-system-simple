@@ -539,14 +539,14 @@ sub _check_exit {
 	# If we have a single-value list consisting of the EXIT_ANY
 	# value, then we're happy with whatever exit value we're given.
 	if (@$valid_returns == 1 and $valid_returns->[0] == EXIT_ANY_CONST) {
-		return IPC::System::Simple::Exception->success(exitval=>$exitval);
+		return IPC::System::Simple::Exception->success(exit_value=>$exitval);
 	}
 
 	if (not defined first { $_ == $exitval } @$valid_returns) {
-		return IPC::System::Simple::Exception->fail_badexit(exitval=>$exitval);
+		return IPC::System::Simple::Exception->fail_badexit(exit_value=>$exitval);
 	}
 
-    return IPC::System::Simple::Exception->success(exitval=>$exitval);
+    return IPC::System::Simple::Exception->success(exit_value=>$exitval);
 }
 
 
