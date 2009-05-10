@@ -2,9 +2,11 @@ package IPC::System::Simple::Exception;
 
 use strict;
 use warnings;
+use Carp;
 use Config;
 use overload '""' => "stringify";
 
+use constant ISSE_UNKNOWN   => 0;
 use constant ISSE_SUCCESS   => 1;
 use constant ISSE_FSTART    => 2;
 use constant ISSE_FSIGNAL   => 3;
@@ -14,6 +16,7 @@ use constant ISSE_FBADEXIT  => 5;
 my @Signal_from_number = split(' ', $Config{sig_name});
 
 our %DEFAULTS = (
+    type              => ISSE_UNKNOWN,
     exit_value        => -1,
     signal_number     => -1,
     started_ok        => 1,
@@ -80,35 +83,35 @@ sub new {
 
 sub fail_start {
     my $class = shift;
-    my $this  = $class->new(@_, started_ok=>undef);
+    my $this  = $class->new(@_, started_ok=>undef, type=>ISSE_FSTART);
 
     $this;
 }
 
 sub fail_signal {
     my $class = shift;
-    my $this  = $class->new(@_);
+    my $this  = $class->new(@_, type=>ISSE_FSIGNAL);
 
     $this;
 }
 
 sub fail_internal {
     my $class = shift;
-    my $this  = $class->new(@_);
+    my $this  = $class->new(@_, type=>ISSE_FINTERNAL);
 
     $this;
 }
 
 sub fail_badexit {
     my $class = shift;
-    my $this  = $class->new(@_);
+    my $this  = $class->new(@_, type=>ISSE_FBADEXIT);
 
     $this;
 }
 
 sub success {
     my $class = shift;
-    my $this  = $class->new(@_);
+    my $this  = $class->new(@_, type=>ISSE_SUCCESS);
 
     $this;
 }
@@ -157,3 +160,5 @@ sub function { $_[0]->{function} }
 sub file     { $_[0]->{file}     }
 sub package  { $_[0]->{package}  }
 sub caller   { $_[0]->{caller}   }
+
+sub type     { $_[0]->{type} }
