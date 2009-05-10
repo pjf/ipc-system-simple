@@ -171,8 +171,8 @@ sub stringify {
     my $error = sprintf($this->{format}, map {
             my $res;
 
-            if( m/^(.+?)\(\)$/ ) { $res = $this->$1() }
-            else                 { $res = $this->{$_} }
+            if( m/^(.+?)\(\)$/ ) { $res = eval {$this->$1()} || "!?!?!"  }
+            else                 { $res = $this->{$_}        || "!?!?!"  }
 
             $res;
 
