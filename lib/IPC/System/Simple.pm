@@ -517,7 +517,7 @@ sub _process_child_error {
 	} elsif ( WIFEXITED( $child_error ) ) {
 		$EXITVAL = WEXITSTATUS( $child_error );
 
-		return _check_exit($command,$EXITVAL,$valid_returns);
+		return _check_exit($command, $EXITVAL, $valid_returns);
 
 	} elsif ( WIFSIGNALED( $child_error ) ) {
 		my $signal_no = WTERMSIG( $child_error );
@@ -591,29 +591,6 @@ sub process_child_error {
 
     return $status;
 }
-
-# my $status = process_child_error($?, {
-# 	command => $cmd,
-# 	args    => \@args,
-# 	allowable_returns => \@returns,
-# 	...,
-# });
-
-# $status->is_success;		# Boolean
-# $status->exit_value;
-# $status->signal_number;
-# $status->signal_name;
-# $status->dumped_core;		# Boolean
-# $status->started_ok;		# Boolean
-# $status->stringify;		# Human friendly string
-# $status->throw;			# Throw the object as an exception
-# 
-# # Inspect how we were originally called.
-# 
-# $status->child_error;		# $? or equiv
-# $status->command;
-# $status->args;
-# $status->allowable_returns;
 
 sub succeed_or_die {
     my $status = process_child_error(@_);
