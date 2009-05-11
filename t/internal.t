@@ -12,7 +12,8 @@ use IPC::System::Simple;
 is(_check_exit("command",1,[0..5]), 1, "Successful exit");
 
 eval { 
-	_check_exit("command",127,[0..5], 1);
+	my $status = _check_exit("command",127,[0..5], 1);
+    $status->throw unless $status->is_success;
 };
 
 like($@,qr{unexpectedly returned exit value},"Failed exit");
