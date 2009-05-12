@@ -47,6 +47,7 @@ our %DEFAULTS = (
     fmt_args          => [],
 );
 
+# XXX: This works as long as there's one and only one importer.... must fix
 my $USEDBY = "IPC::System::Simple";
 sub import { $USEDBY = caller; return }
 
