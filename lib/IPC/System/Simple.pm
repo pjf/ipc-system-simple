@@ -600,7 +600,7 @@ sub succeed_or_die {
 
     $status->is_success or $status->throw;
 
-    return $EXITVAL = $status->exit_value;
+    return $status;
 }
 
 1;
