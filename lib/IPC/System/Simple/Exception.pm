@@ -25,7 +25,7 @@ use strict;
 use warnings;
 use Carp;
 use Config;
-use overload '""' => "stringify", "0+" => "stringify";
+use overload '""' => "stringify", fallback=>1;
 
 use constant ISSE_UNKNOWN   => 0;
 use constant ISSE_SUCCESS   => 1;
