@@ -21,6 +21,10 @@ IPC::System::Simple::Exception - a simple exception class for ISSS
 
 =cut
 
+# PJF - Having now given the matter a little more thought, should we
+# really call this an 'exception' class?  It's really a status, that can
+# be thrown as an exception.
+
 use strict;
 use warnings;
 use Carp;
@@ -78,6 +82,9 @@ sub new {
         # Skip up the call stack until we find something outside
         # of the caller, $class or eval space
 
+        # PJF - As long as we recommend that end-users always use
+        # ISS directly, then we may not need to check $USEDBY at all.
+
         next if $package->isa($USEDBY);
         next if $package->isa($class);
         next if $package->isa(__PACKAGE__);
@@ -85,6 +92,12 @@ sub new {
 
         last;
     }
+
+    # PJF - Gosh, we're using this in both ISSE and autodie, I'm
+    # wondering if there's scope for this to be extracted into a
+    # separate module?  If so, there's a discussion regarding dependencies
+    # and core modules to be had (since autodie is core, which makes
+    # deps bothersome).
 
     # We now have everything correct, *except* for our subroutine
     # name.  If it's __ANON__ or (eval), then we need to keep on
@@ -230,6 +243,15 @@ B<success> requires the L</exit_value> of the process.
 
 =cut
 
+# PJF - I'm not sure success is the best name here, because an end user
+# *may* call it by accident.  If we separated the construction class
+# (which builds the objects) from the exception/status objects themselves,
+# then this problem goes away.
+#
+# PJF - Alternatively, a single method for building that takes the type of
+# success/error would solve this issue, and has the advantage that anyone
+# who wants to subclass in the future can just override a single method.
+
 sub success {
     my $class = shift;
     my $this  = $class->new(@_, type=>ISSE_SUCCESS);
@@ -284,6 +306,11 @@ settings and what happens when they're missing.
 
 =cut
 
+# PJF - This doesn't do any checks to see if the attributes set are
+# sensible, or that the attributes aren't clobbering internal state
+# that we don't want to make public.  Does it make sense to be changing
+# attributes on the object after it's been created?
+
 sub set {
     my ($this, %opts) = @_;
 
@@ -302,6 +329,10 @@ croak an error (delivering the object into L<$@|perlvar/$@__>).
 
 =cut
 
+# PJF - Should this be a die() instead of a croak()?  We've already gone
+# to the effort of finding our caller at object construction, so we
+# shouldn't need croak to do it again.
+
 sub throw {
     my $this = shift;
 
@@ -319,6 +350,12 @@ numerically, the objects (or possibly L<$@|perlvar/$@__>) will return the result
 of B<stringify> automatically.
 
 =cut
+
+# PJF - I'm not sure what the !?!?! represents.  I'm also not thrilled
+# about this returning the exit value on success, since the method is
+# 'stringify', and hence we'd expect a string to come back.
+#
+# PJF - I need to look at this subroutine more.
 
 sub stringify {
     my $this = shift;
