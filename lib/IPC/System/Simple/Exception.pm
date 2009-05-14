@@ -25,6 +25,9 @@ IPC::System::Simple::Exception - a simple exception class for ISSS
 # really call this an 'exception' class?  It's really a status, that can
 # be thrown as an exception.
 
+# JET - I did notice that.  It is sensible since it takes on both roles...
+# is_success/exit_value don't really belong here if it's an exception class.
+
 use strict;
 use warnings;
 use Carp;
@@ -85,6 +88,14 @@ sub new {
         # PJF - As long as we recommend that end-users always use
         # ISS directly, then we may not need to check $USEDBY at all.
 
+        # JET - I wish to get rid of USEBY, don't get me wrong, but it seems
+        # like you want this package to know where the error really occured.  It
+        # won't do for it to announce errors by file and line in Simple.pm, so I
+        # wished to back up one more frame.
+        #
+        # We can't really go back a set number of frames because sometimes this
+        # package also kills itself.  USEBY clearly has to go though.
+
         next if $package->isa($USEDBY);
         next if $package->isa($class);
         next if $package->isa(__PACKAGE__);
@@ -98,6 +109,9 @@ sub new {
     # separate module?  If so, there's a discussion regarding dependencies
     # and core modules to be had (since autodie is core, which makes
     # deps bothersome).
+
+    # JET - (Well, this *is* a copy of the autodie exception class.  Perhaps
+    # this stuff isn't really even needed here.)
 
     # We now have everything correct, *except* for our subroutine
     # name.  If it's __ANON__ or (eval), then we need to keep on
@@ -252,6 +266,34 @@ B<success> requires the L</exit_value> of the process.
 # success/error would solve this issue, and has the advantage that anyone
 # who wants to subclass in the future can just override a single method.
 
+# JET - I'm not particularly fond of the method name: success().  In fact, I
+# imagined this might come up -- and never did come up with a suitable
+# replacement.  The different constructors are mostly similar, but some do a
+# couple extra things (fail_plumbing vs fail_start).  I was afraid of this:
+
+#     sub huge {
+#         ... new things ...
+#         if( )
+#         elsif( )
+#         elsif( )
+#         elsif( )
+#         elsif( )
+#         elsif( )
+#
+#         if( )
+#         elsif( )
+#         elsif( )
+#         elsif( )
+#         elsif( )
+#         elsif( )
+#     }
+
+# JET - (continued) I also imagined subclassing to be not such a problem since
+# it'd *generally* be adding another fail type, or subtracting one back out.  I
+# can't help but wonder: will this really get subclassed very often anyway?
+# Aside from extending ISS for an extra gizmo, I can't imagine it'd come up
+# very often.
+
 sub success {
     my $class = shift;
     my $this  = $class->new(@_, type=>ISSE_SUCCESS);
@@ -311,6 +353,17 @@ settings and what happens when they're missing.
 # that we don't want to make public.  Does it make sense to be changing
 # attributes on the object after it's been created?
 
+# JET - it did make sense to make the retro fit in Simple.pm easier and more
+# readable.  I like the way it reads to set the command and args well after the
+# crash has occured.  The other choice would be to modify nearly every function
+# that *can* crash to suddenly know the command and args just so it can pass
+# them in to the constructor.  Certainly an optoin, but I disliked the idea of
+# carring around all those arguments.
+#
+# I liked having this set() function because it could later be fitted with
+# sanity checks -- I didn't really see a need for them now, but imagined it'd
+# come up in the future.
+
 sub set {
     my ($this, %opts) = @_;
 
@@ -332,6 +385,10 @@ croak an error (delivering the object into L<$@|perlvar/$@__>).
 # PJF - Should this be a die() instead of a croak()?  We've already gone
 # to the effort of finding our caller at object construction, so we
 # shouldn't need croak to do it again.
+
+# JET - I don't see that it makes a huge difference.  Hopefully we're not
+# crashing so often that the extra cycles make a difference.  But die is
+# probably better.
 
 sub throw {
     my $this = shift;
@@ -356,6 +413,14 @@ of B<stringify> automatically.
 # 'stringify', and hence we'd expect a string to come back.
 #
 # PJF - I need to look at this subroutine more.
+
+# JET - I have mixed feelings about this tragedy myself, so ... all input
+# welcome.  In fact, the commit where I numberify from a stringify notes this
+# conflict.  The !?!?!?! on the other hand represents that this exception wasn't
+# built well and we don't really know what bad thing is happening.  It could
+# maybe say "<internal error: error unknown or something>" and mean nearly the
+# same thing.  Hopefully end users don't see either.  But if they did, they
+# could at least have something curious to ack/grep with.
 
 sub stringify {
     my $this = shift;
