@@ -2,7 +2,7 @@ package IPC::System::Simple::Exception;
 
 =head1 NAME
 
-IPC::System::Simple::Exception - a simple exception class for ISSS
+IPC::System::Simple::Exception - a simple exception class for ISS
 
 =head1 SYNOPSIS
 
@@ -10,12 +10,12 @@ IPC::System::Simple::Exception - a simple exception class for ISSS
     use warnings;
     use IPC::System::Simple qw(systemx);
 
-    eval { systemx(qw(ls -al /tmp)); 1 }
+    eval { systemx(qw(ls -al /tmp)); }
 
     if( $@->started_ok ) {
         warn "ls started ok, but something else went wrong: $@";
-
-    } else {
+    }
+    else {
         warn "curiously, ls wouldn't even start up...\n";
     }
 
