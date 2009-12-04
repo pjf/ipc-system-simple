@@ -106,6 +106,7 @@ if (VMS) {
 eval { WIFEXITED(0); };
 
 if ($@ =~ UNDEFINED_POSIX_RE) {
+        no warnings 'redefine';
 	*WIFEXITED   = sub { not $_[0] & 0xff };
 	*WEXITSTATUS = sub { $_[0] >> 8  };
 	*WIFSIGNALED = sub { $_[0] & 127 };
