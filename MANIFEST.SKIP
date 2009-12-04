@@ -3,7 +3,7 @@
 .gitignore
 pm_to_lib
 MANIFEST.bak
-MANIFEST.skip
+MANIFEST.SKIP
 blib
 .*.pm~$
 Makefile$
@@ -11,3 +11,4 @@ Makefile.old
 IPC-System-Simple-.*.tar.gz
 t/cover_db
 cover_db
+t/dir[ ]with[ ]spaces
