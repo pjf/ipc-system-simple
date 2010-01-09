@@ -1,6 +1,13 @@
 Revision history for Perl extension IPC::System::Simple.
 
-1.19  Fri Dec  4 14:14:25 EST 2009
+1.20  Sat Jan  9 15:08:41 AUSEST 2010
+
+        * TEST: t/win32.t no longer claims to have more tests than
+          it really has.  This fixes an install issue under Windows.
+          RT #53124.  Thanks to Erez Schatz and Curtis Jewell for
+          spotting this.
+
+1.19  Fri Dec  4 14:14:25 AUSEST 2009
 
         * TEST: Added tests to ensure correct behaviour when
           calling commands in Windows which are contained in directories

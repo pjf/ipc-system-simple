@@ -27,7 +27,7 @@ use constant EXIT_CMD => [ @{ &IPC::System::Simple::WINDOWS_SHELL }, 'exit'];
 use constant CMD_WITH_SPACES        => 'dir with spaces\hello.exe';
 use constant CMD_WITH_SPACES_OUTPUT => "Hello World\n";
 
-plan tests => 32;
+plan tests => 30;
 
 my $perl_path = $Config{perlpath};
 $perl_path .= $Config{_exe} unless $perl_path =~ m/$Config{_exe}$/i;
@@ -131,7 +131,7 @@ SKIP: {
     is($@, "", "command with spaces should not error (capturex)");
     is($output, CMD_WITH_SPACES_OUTPUT, "...and give correct output");
 
-    my $output = eval { capture(CMD_WITH_SPACES); };
+    $output = eval { capture(CMD_WITH_SPACES); };
 
     is($@, "", "command with spaces should not error (capture)");
     is($output, CMD_WITH_SPACES_OUTPUT, "...and give correct output");
