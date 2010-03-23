@@ -1,9 +1,11 @@
 Revision history for Perl extension IPC::System::Simple.
 
-1.21  Tue Mar 23 12:02:12 AUSEST 2010
-
+1.21  Tue Mar 23 12:08:47 AUSEST 2010
         * TEST: t/win32.t has more sane handling of skipped and
           unimplimented tests.
+
+        * TEST: Author tests no longer leave the permissions of
+          not_an_exe.txt permanently changed.
 
         * BUGFIX: capture/capturex no longer break STDOUT when
           running an unknown command under Windows.  Many thanks

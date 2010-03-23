@@ -74,6 +74,7 @@ SKIP: {
 
 	chmod(0,NOT_AN_EXE);
 	eval { capture(NOT_AN_EXE,1); };
+        chmod(0644,NOT_AN_EXE);             # To stop git complaining
 
 	like($@, qr{Permission denied|No such file|The system cannot find the file specified}, "Permission denied on non-exe" );
 	like($@, qr{failed to start}, "Non-exe failed to start" );
