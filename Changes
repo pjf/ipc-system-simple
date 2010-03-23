@@ -1,11 +1,15 @@
 Revision history for Perl extension IPC::System::Simple.
 
+1.21  Tue Mar 23 12:02:12 AUSEST 2010
+
         * TEST: t/win32.t has more sane handling of skipped and
           unimplimented tests.
 
         * BUGFIX: capture/capturex no longer break STDOUT when
           running an unknown command under Windows.  Many thanks
           to Jan Krynicky for a fix.  (RT #48319)
+
+        * BUILD: Upgraded to Module::Install 0.93.
 
 1.20  Sat Jan  9 15:08:41 AUSEST 2010
 
