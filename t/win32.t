@@ -27,7 +27,7 @@ use constant EXIT_CMD => [ @{ &IPC::System::Simple::WINDOWS_SHELL }, 'exit'];
 use constant CMD_WITH_SPACES        => 'dir with spaces\hello.exe';
 use constant CMD_WITH_SPACES_OUTPUT => "Hello World\n";
 
-plan tests => 30;
+plan tests => 32;
 
 my $perl_path = $Config{perlpath};
 $perl_path .= $Config{_exe} unless $perl_path =~ m/$Config{_exe}$/i;
@@ -124,7 +124,8 @@ SKIP: {
     # CMD_WITH_SPACES is not currently distributed with IPC::System::Simple,
     # effectively making this an author test for now. -- PJF, Dec 4, 2009
 
-    skip(CMD_WITH_SPACES." not available", 2) unless -x CMD_WITH_SPACES;
+    skip(CMD_WITH_SPACES." not implemented", 4);
+    # skip(CMD_WITH_SPACES." not available", 4) unless -x CMD_WITH_SPACES;
 
     my $output = eval { capturex(CMD_WITH_SPACES); };
 

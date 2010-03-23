@@ -1,5 +1,8 @@
 Revision history for Perl extension IPC::System::Simple.
 
+        * TEST: t/win32.t has more sane handling of skipped and
+          unimplimented tests.
+
 1.20  Sat Jan  9 15:08:41 AUSEST 2010
 
         * TEST: t/win32.t no longer claims to have more tests than
