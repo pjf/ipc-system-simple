@@ -296,11 +296,21 @@ sub _win32_capture {
         # And now we spawn our new process with inherited
         # filehandles.
 
-        my $pid = _spawn_or_die($exe, "$command @args");
+        my $err;
+        my $pid = eval { 
+                _spawn_or_die($exe, "$command @args"); 
+        }
+        or do {
+                $err = $@;
+        };
 
-        # Now restore our STDOUT.
+        # Regardless of whether our command ran, we must restore STDOUT.
+        # RT #48319
         open(STDOUT, '>&', $saved_stdout)  ## no critic
                 or croak sprintf(FAIL_PLUMBING,"Can't restore STDOUT", $!);
+
+        # And now, if there was an actual error , propagate it.
+        die $err if defined $err;   # If there's an error from _spawn_or_die
 
         # Clean-up the filehandles we no longer need...
 

@@ -27,7 +27,7 @@ use constant EXIT_CMD => [ @{ &IPC::System::Simple::WINDOWS_SHELL }, 'exit'];
 use constant CMD_WITH_SPACES        => 'dir with spaces\hello.exe';
 use constant CMD_WITH_SPACES_OUTPUT => "Hello World\n";
 
-plan tests => 32;
+plan tests => 33;
 
 my $perl_path = $Config{perlpath};
 $perl_path .= $Config{_exe} unless $perl_path =~ m/$Config{_exe}$/i;
@@ -70,7 +70,6 @@ foreach my $big_exitval (SMALL_EXIT, BIG_EXIT, HUGE_EXIT) {
 # this bug.
 
 # TODO: Make sure that we *don't* suffer from this bug.
-
 
 # Testing to ensure that our PATH gets respected...
 
@@ -116,6 +115,18 @@ ok(1,"perl found in multi-part path");
 
 run($raw_perl,"-e1");
 ok(1,"raw perl found in multi-part path");
+
+# RT #48319 - capture/capturex could break STDOUT when running
+# unknown commands.  The following spawns another process to
+# use capture.  In buggy versions, the '2' is never printed.
+# In bugfixed versions, it is.
+
+my $output = capture(
+	$^X, '-MIPC::System::Simple=capture',
+	q(-e"print 1; eval { capture(q(nosuchcmd)); }; print 2; exit 0;")
+);
+
+is($output,"12","RT #48319 - Check for STDOUT replumbing");
 
 # Check to ensure we can run commands that include spaces.
 
