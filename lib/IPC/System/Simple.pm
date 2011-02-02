@@ -167,8 +167,11 @@ sub run {
 	# We're throwing our own exception on command not found, so
 	# we don't need a warning from Perl.
 
-	no warnings 'exec';		## no critic
-	CORE::system($command,@args);
+        {
+            # no critic; no 'Statement unlikely to be reached' warning
+            no warnings 'exec';
+            CORE::system($command,@args);
+        }
 
 	return _process_child_error($?,$command,$valid_returns);
 }
