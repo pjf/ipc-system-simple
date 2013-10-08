@@ -1,12 +1,17 @@
 Revision history for Perl extension IPC::System::Simple.
 
-{{NEXT}}
+{{$NEXT}}
+
         * BUGFIX: Silence "Statement unlikely to be reached" warning
           (Karen Etheridge)
 
         * BUGFIX: Repository information fix, and typo fixes (@dsteinbrunner)
 
         * BUILD: Converted to using dzil.
+
+1.22  Tue Oct  8 14:49:43 AUSEST 2013
+
+        * Same as 1.23 release, but with booched changelog. Oops! :)
 
 1.21  Tue Mar 23 12:08:47 AUSEST 2010
         * TEST: t/win32.t has more sane handling of skipped and
