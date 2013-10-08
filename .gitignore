@@ -11,3 +11,6 @@ t/core
 Debian_CPANTS.txt
 MYMETA.json
 MYMETA.yml
+.build
+*.swp
+IPC-System-Simple-*

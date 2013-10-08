@@ -1,5 +1,7 @@
 package IPC::System::Simple;
 
+# ABSTRACT: Run commands simply, with detailed diagnostics
+
 use 5.006;
 use strict;
 use warnings;
@@ -84,7 +86,7 @@ our @EXPORT_OK = qw(
     $EXITVAL EXIT_ANY
 );
 
-our $VERSION = '1.21';
+# VERSION : From dzil
 our $EXITVAL = -1;
 
 my @Signal_from_number = split(' ', $Config{sig_name});
@@ -1085,5 +1087,7 @@ Copyright (C) 2006-2008 by Paul Fenwick
 This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself, either Perl version 5.6.0 or,
 at your option, any later version of Perl 5 you may have available.
+
+=for Pod::Coverage WCOREDUMP
 
 =cut
