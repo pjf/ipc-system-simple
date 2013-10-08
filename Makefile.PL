@@ -17,7 +17,7 @@ test_requires(	'Test'		=> 0);
 test_requires(	'Test::More'	=> 0);
 test_requires(	'File::Basename'=> 0);
 
-resources(	repository	=> "http://github.com/pfenwick/ipc-system-simple/tree/master");
+resources(	repository	=> "http://github.com/pjf/ipc-system-simple/");
 resources(	bugtracker	=> "http://rt.cpan.org/NoAuth/Bugs.html?Dist=IPC-System-Simple");
 resources(	Forum		=> "http://www.cpanforum.com/dist/IPC-System-Simple");
 resources(	Blog		=> "http://pjf.id.au/blog/toc.html?tag=ipc-system-simple");
