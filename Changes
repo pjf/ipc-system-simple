@@ -2,6 +2,8 @@ Revision history for Perl extension IPC::System::Simple.
 
 {{$NEXT}}
 
+1.23      2013-10-08 14:50:50 Australia/Melbourne
+
         * BUGFIX: Silence "Statement unlikely to be reached" warning
           (Karen Etheridge)
 
