@@ -2,6 +2,8 @@ Revision history for Perl extension IPC::System::Simple.
 
 {{$NEXT}}
 
+1.24      2013-10-18 16:27:39 Australia/Melbourne
+
         * BUILD: No longer mark BSD::Resource as required (GH #6).
 
         * TEST: Skip core-dump tests on OS X. They're not as
