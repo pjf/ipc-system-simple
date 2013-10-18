@@ -5,6 +5,14 @@ use Config;
 
 use constant SIGABRT => 6;
 
+# Core dumps on OS X are complicated. See GH #5.
+
+BEGIN {
+    if ($^O eq 'darwin') {
+        plan skip_all => "Coredump tests skipped under OS X/Darwin";
+    }
+}
+
 BEGIN {
     eval { require BSD::Resource; BSD::Resource->import() };
 

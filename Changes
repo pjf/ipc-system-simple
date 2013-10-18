@@ -2,7 +2,10 @@ Revision history for Perl extension IPC::System::Simple.
 
 {{$NEXT}}
 
-        * BUILD: No longer mark BSD::Resource as required (GH #5).
+        * BUILD: No longer mark BSD::Resource as required (GH #6).
+
+        * TEST: Skip core-dump tests on OS X. They're not as
+          straightforward as the test script would like. (GH #5).
 
 1.23      2013-10-08 14:50:50 Australia/Melbourne
 
