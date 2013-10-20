@@ -2,6 +2,8 @@ Revision history for Perl extension IPC::System::Simple.
 
 {{$NEXT}}
 
+1.25      2013-10-20 13:38:32 Pacific/Auckland
+
         * BUILD: No longer ship unrequired file Debian_CPANTS.txt.
           (GH #7, thanks to real-dam)
 
