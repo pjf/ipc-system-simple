@@ -303,7 +303,7 @@ sub _win32_capture {
 
         my $err;
         my $pid = eval { 
-                _spawn_or_die($exe, "$command @args"); 
+                _spawn_or_die($exe, qq{"$command" @args}); 
         }
         or do {
                 $err = $@;
