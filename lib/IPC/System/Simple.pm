@@ -455,7 +455,6 @@ sub _spawn_or_die {
 		my ($orig_exe, @args) = @_;
 		my $pid;
 
-		# Quote the executable name/path.
 		my $exe = $orig_exe;
 
 		# Prepare command line.
