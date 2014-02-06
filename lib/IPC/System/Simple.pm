@@ -461,7 +461,7 @@ sub _spawn_or_die {
 		foreach my $arg (@args)
 		{
 			# Escape double quotation marks and backslashes.
-			$arg =~ s/([\\"])/\\$1/g;
+			$arg =~ s,(\\*)",$1$1\\",g;
 			# Wrap each argument with double quotation marks.
 			$arg = '"' . $arg . '"';
 		}
