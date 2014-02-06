@@ -461,9 +461,8 @@ sub _spawn_or_die {
 		# Prepare command line.
 		foreach my $arg (@args)
 		{
-			# Escape double quotation marks.  Backslashes appear to be
-			# handled by the Win32::Process::Create() function.
-			$arg =~ s/(")/\\$1/g;
+			# Escape double quotation marks and backslashes.
+			$arg =~ s/([\\"])/\\$1/g;
 			# Wrap each argument with double quotation marks.
 			$arg = '"' . $arg . '"';
 		}
