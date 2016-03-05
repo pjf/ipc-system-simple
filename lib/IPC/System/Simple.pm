@@ -715,7 +715,7 @@ or process diagnostics, then read on!
 =head2 run() and system()
 
 C<IPC::System::Simple> provides a subroutine called
-C<run>, that executes a command using the same semantics is
+C<run>, that executes a command using the same semantics as
 Perl's built-in C<system>:
 
     use IPC::System::Simple qw(run);
