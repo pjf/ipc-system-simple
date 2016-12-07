@@ -79,7 +79,7 @@ use constant UNDEFINED_POSIX_RE => qr{not (?:defined|a valid) POSIX macro|not im
 require Exporter;
 our @ISA = qw(Exporter);
 
-our @EXPORT_OK = qw( 
+our @EXPORT_OK = qw(
     capture  capturex
     run      runx
     system   systemx
@@ -188,7 +188,7 @@ sub runx {
     if (WINDOWS) {
         our $EXITVAL = -1;
 
-        my $pid = _spawn_or_die($command, "$command @args");
+        my $pid = _spawn_or_die($command, $command, @args);
 
         $pid->Wait(INFINITE);	# Wait for process exit.
         $pid->GetExitCode($EXITVAL);
@@ -232,7 +232,7 @@ sub capture {
                 my @results = qx($command);
                 _process_child_error($?,$command,$valid_returns);
                 return @results;
-        } 
+        }
 
         my $results = qx($command);
         _process_child_error($?,$command,$valid_returns);
@@ -267,7 +267,7 @@ sub _win32_capture {
         open(my $saved_stdout, '>&', \*STDOUT)  ## no critic
                 or croak sprintf(FAIL_PLUMBING, "Can't dup STDOUT", $!);
 
-        # We now open up a pipe that will allow us to	
+        # We now open up a pipe that will allow us to
         # communicate with the new process.
 
         pipe(my ($read_fh, $write_fh))
@@ -302,8 +302,8 @@ sub _win32_capture {
         # filehandles.
 
         my $err;
-        my $pid = eval { 
-                _spawn_or_die($exe, qq{"$command" @args}); 
+        my $pid = eval {
+                _spawn_or_die($exe, $command, @args);
         }
         or do {
                 $err = $@;
@@ -433,7 +433,7 @@ sub capturex {
 	my $results = join("",<$pipe>);
 	close($pipe);
 	_process_child_error($?,$command,$valid_returns);
-	
+
 	return $results;
 
 }
@@ -452,10 +452,20 @@ sub _spawn_or_die {
 	if (not WINDOWS) {
 		croak sprintf(FAIL_INTERNAL, "_spawn_or_die called when not under Win32");
 	} else {
-		my ($orig_exe, $cmdline) = @_;
+		my ($orig_exe, @args) = @_;
 		my $pid;
 
 		my $exe = $orig_exe;
+
+		# Prepare command line.
+		foreach my $arg (@args)
+		{
+			# Escape double quotation marks and backslashes.
+			$arg =~ s/([\\"])/\\$1/g;
+			# Wrap each argument with double quotation marks.
+			$arg = '"' . $arg . '"';
+		}
+		my $cmdline = join " ", @args;
 
 		# If our command doesn't have an extension, add one.
 		$exe .= $Config{_exe} if ($exe !~ m{\.});
@@ -514,7 +524,7 @@ sub _check_taint {
 
 sub _process_child_error {
 	my ($child_error, $command, $valid_returns) = @_;
-	
+
 	$EXITVAL = -1;
 
 	my $coredump = WCOREDUMP($child_error);
@@ -544,7 +554,7 @@ sub _process_child_error {
 		croak sprintf FAIL_SIGNAL, $command, $signal_name, $signal_no, ($coredump ? " and dumped core" : "");
 
 
-	} 
+	}
 
 	croak sprintf(FAIL_INTERNAL, qq{'$command' ran without exit value or signal});
 
@@ -565,7 +575,7 @@ sub _check_exit {
 
 	if (not defined first { $_ == $exitval } @$valid_returns) {
 		croak sprintf FAIL_BADEXIT, $command, $exitval;
-	}	
+	}
 	return $exitval;
 }
 
@@ -633,13 +643,13 @@ IPC::System::Simple - Run commands simply, with detailed diagnostics
 
 =head1 DESCRIPTION
 
-Calling Perl's in-built C<system()> function is easy, 
+Calling Perl's in-built C<system()> function is easy,
 determining if it was successful is I<hard>.  Let's face it,
 C<$?> isn't the nicest variable in the world to play with, and
 even if you I<do> check it, producing a well-formatted error
 string takes a lot of work.
 
-C<IPC::System::Simple> takes the hard work out of calling 
+C<IPC::System::Simple> takes the hard work out of calling
 external commands.  In fact, if you want to be really lazy,
 you can just write:
 
@@ -696,14 +706,14 @@ or process diagnostics, then read on!
 
   # Capture output into $result and throw exception on failure
 
-  my $result = capture("some_command");	
+  my $result = capture("some_command");
 
   # Check exit value from captured command
 
   print "some_command exited with status $EXITVAL\n";
 
   # Captures into @lines, splitting on $/
-  my @lines = capture("some_command"); 
+  my @lines = capture("some_command");
 
   # Run a command which must return 0..5, capture the output into
   # @lines, and avoid the shell.
@@ -992,7 +1002,7 @@ hard work for you.
 If an odd exit status is provided, you're informed of what it is.  If
 a signal kills your process, you are informed of both its name and
 number.  If tainted data or environment prevents your command from
-running, you are informed of exactly which datais 
+running, you are informed of exactly which datais
 
 =item Exceptions on failure
 
@@ -1039,7 +1049,7 @@ Signals are not supported under Win32 systems, since they don't
 work at all like Unix signals.  Win32 singals cause commands to
 exit with a given exit value, which this modules I<does> capture.
 
-Only 8-bit values are returned when C<run()> or C<system()> 
+Only 8-bit values are returned when C<run()> or C<system()>
 is called with a single value under Win32.  Multi-argument calls
 to C<run()> and C<system()>, as well as the C<runx()> and
 C<systemx()> always return the 32-bit Windows return values.
