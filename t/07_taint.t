@@ -17,8 +17,8 @@ use_ok("IPC::System::Simple","run","capture");
 
 chdir("t");     # Ignore return, since we may already be in t/
 
-my $taint = $ENV{(keys(%ENV))[0]} . "foo";	# ."foo" to avoid zero length
-ok(tainted($taint),"Sanity - ENV vars are tainted");
+my $taint = $0 . "foo";	# ."foo" to avoid zero length
+ok(tainted($taint),"Sanity - executable name is tainted");
 
 my $evil_zero = 1 - (length($taint) / length($taint));
 
