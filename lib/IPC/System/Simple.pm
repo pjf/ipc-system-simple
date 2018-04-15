@@ -228,15 +228,9 @@ sub capture {
 	# We'll produce our own warnings on failure to execute.
 	no warnings 'exec';	## no critic
 
-        if ($wantarray) {
-                my @results = qx($command);
-                _process_child_error($?,$command,$valid_returns);
-                return @results;
-        } 
-
-        my $results = qx($command);
+        my @results = $wantarray ? qx($command) : scalar qx($command);
         _process_child_error($?,$command,$valid_returns);
-        return $results;
+        return $wantarray ? @results : $results[0];
 }
 
 # _win32_capture implements the capture and capurex commands on Win32.
@@ -326,13 +320,7 @@ sub _win32_capture {
 
         # Read the data from our child...
 
-        my (@results, $result);
-
-        if ($wantarray) {
-                @results = <$read_fh>;
-        } else {
-                $result = join("",<$read_fh>);
-        }
+        my @results = $wantarray ? <$read_fh> : join("", <$read_fh>);
 
         # Tidy up our windows process and we're done!
 
@@ -341,7 +329,7 @@ sub _win32_capture {
 
         _check_exit($command,$EXITVAL,$valid_returns);
 
-        return $wantarray ? @results : $result;
+        return $wantarray ? @results : $results[0];
 
     }
 }
@@ -419,23 +407,10 @@ sub capturex {
 	# Parent process, we don't care about our pid, but we
 	# do go and read our pipe.
 
-	if ($wantarray) {
-		my @results = <$pipe>;
-		close($pipe);
-		_process_child_error($?,$command,$valid_returns);
-		return @results;
-	}
-
-	# NB: We don't check the return status on close(), since
-	# on failure it sets $?, which we then inspect for more
-	# useful information.
-
-	my $results = join("",<$pipe>);
+	my @results = $wantarray ? <$pipe> : join('', <$pipe>);
 	close($pipe);
 	_process_child_error($?,$command,$valid_returns);
-	
-	return $results;
-
+	return $wantarray ? @results : $results[0];
 }
 
 # Tries really hard to spawn a process under Windows.  Returns
