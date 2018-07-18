@@ -734,7 +734,7 @@ same behaviour:
 
     use IPC::System::Simple qw(system);
 
-    system("cat *.txt");  # system now suceeds or dies!
+    system("cat *.txt");  # system now succeeds or dies!
 
 C<system> and C<run> are aliases to each other.
 
@@ -999,7 +999,7 @@ running, you are informed of exactly which datais
 C<IPC::System::Simple> takes an aggressive approach to error handling.
 Rather than allow commands to fail silently, exceptions are thrown
 when unexpected results are seen.  This allows for easy development
-using a try/catch style, and avoids the possibility of accidently
+using a try/catch style, and avoids the possibility of accidentally
 continuing after a failed command.
 
 =item Easy access to exit status
@@ -1036,7 +1036,7 @@ C<WIFSTOPPED> status is not checked, as perl never spawns processes
 with the C<WUNTRACED> option.
 
 Signals are not supported under Win32 systems, since they don't
-work at all like Unix signals.  Win32 singals cause commands to
+work at all like Unix signals.  Win32 signals cause commands to
 exit with a given exit value, which this modules I<does> capture.
 
 Only 8-bit values are returned when C<run()> or C<system()> 

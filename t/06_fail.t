@@ -11,7 +11,7 @@ use_ok('IPC::System::Simple', qw(run capture));
 
 # Bad command, run
 eval { run([1,127],"xyzzy42this_command_does_not_exist","foo"); };
-like ($@, qr{failed to start}, "Non-existant, run ");
+like ($@, qr{failed to start}, "Non-existent, run ");
 
 # Bad calls to I::S::Simple
 
@@ -29,8 +29,8 @@ like($@, qr{IPC::System::Simple::capture called with no command},"No command pas
 
 # Bad command, capture
 eval { capture([1,127],"xyzzy42this_command_does_not_exist"); };
-like ($@, qr{failed to start}, "Not existant, capture");
+like ($@, qr{failed to start}, "Not existent, capture");
 
 # Bad command, capture w/args
 eval { capture([1,127],"xyzzy42this_command_does_not_exist",1); };
-like ($@, qr{failed to start}, "Not existant, capture");
+like ($@, qr{failed to start}, "Not existent, capture");
