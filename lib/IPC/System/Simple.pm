@@ -456,8 +456,8 @@ sub _spawn_or_die {
 	if (not WINDOWS) {
 		croak sprintf(FAIL_INTERNAL, "_spawn_or_die called when not under Win32");
 	} else {
-        my $orig_exe = shift;
-        my $cmdline = Win32::ShellQuote::quote_native(@_);
+		my $orig_exe = shift;
+		my $cmdline = Win32::ShellQuote::quote_native(@_);
 		my $pid;
 
 		my $exe = $orig_exe;
