@@ -192,7 +192,7 @@ sub runx {
     if (WINDOWS) {
         our $EXITVAL = -1;
 
-        my $pid = _spawn_or_die($command, @args);
+        my $pid = _spawn_or_die($command, $command, @args);
 
         $pid->Wait(INFINITE);	# Wait for process exit.
         $pid->GetExitCode($EXITVAL);
