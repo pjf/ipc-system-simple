@@ -192,7 +192,7 @@ sub runx {
     if (WINDOWS) {
         our $EXITVAL = -1;
 
-        my $pid = _spawn_or_die($command, $command, @args);
+        my $pid = _spawn_or_die($command, Win32::ShellQuote::quote_native($command, @args));
 
         $pid->Wait(INFINITE);	# Wait for process exit.
         $pid->GetExitCode($EXITVAL);
@@ -307,7 +307,7 @@ sub _win32_capture {
 
         my $err;
         my $pid = eval { 
-                _spawn_or_die($exe, $command, @args);
+                _spawn_or_die($exe, @args ? Win32::ShellQuote::quote_native($command, @args) : $command);
         }
         or do {
                 $err = $@;
@@ -456,8 +456,7 @@ sub _spawn_or_die {
 	if (not WINDOWS) {
 		croak sprintf(FAIL_INTERNAL, "_spawn_or_die called when not under Win32");
 	} else {
-		my $orig_exe = shift;
-		my $cmdline = Win32::ShellQuote::quote_native(@_);
+		my ($orig_exe, $cmdline) = @_;
 		my $pid;
 
 		my $exe = $orig_exe;
