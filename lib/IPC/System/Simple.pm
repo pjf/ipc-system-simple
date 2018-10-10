@@ -881,15 +881,26 @@ exception will also be thrown.
 
 =head2 WINDOWS-SPECIFIC NOTES
 
-As of C<IPC::System::Simple> v0.06, the C<run> subroutine I<when
-called with multiple arguments> will make available the full 32-bit
-exit value on Win32 systems.  This is different from the
-previous versions of C<IPC::System::Simple> and from Perl's
-in-build C<system()> function, which can only handle 8-bit return values.
+The C<run> subroutine make available the full 32-bit exit value on
+Win32 systems. This has been true since C<IPC::System::Simple> v0.06
+when called with multiple arguments, and since v1.25 when called with
+a single argument.  This is different from the previous versions of
+C<IPC::System::Simple> and from Perl's in-build C<system()> function,
+which can only handle 8-bit return values.
 
 The C<capture> subroutine always returns the 32-bit exit value under
 Windows.  The C<capture> subroutine also never uses the shell,
 even when passed a single argument.
+
+The C<run> subroutine always uses a shell when passed a single
+argument. On NT systems, it uses C<cmd.exe> in the system root, and on
+non-NT systems it uses C<command.com> in the system root.
+
+As of C<IPC::System::Simple> v1.25, the multiple-argument forms of
+each subroutine are properly quoted, so that arugments with spaces and
+the like work properly. Unfortunately, this breaks any attempt to
+invoke the shell itself. If you really need to execute C<cmd.exe>
+or C<command.com>, use the single-argument form.
 
 Versions of C<IPC::System::Simple> before v0.09 would not search
 the C<PATH> environment variable when the multi-argument form of
@@ -1049,11 +1060,6 @@ with the C<WUNTRACED> option.
 Signals are not supported under Win32 systems, since they don't
 work at all like Unix signals.  Win32 signals cause commands to
 exit with a given exit value, which this modules I<does> capture.
-
-Only 8-bit values are returned when C<run()> or C<system()> 
-is called with a single value under Win32.  Multi-argument calls
-to C<run()> and C<system()>, as well as the C<runx()> and
-C<systemx()> always return the 32-bit Windows return values.
 
 =head2 Reporting bugs
 
