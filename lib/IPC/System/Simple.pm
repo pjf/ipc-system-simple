@@ -896,11 +896,14 @@ The C<run> subroutine always uses a shell when passed a single
 argument. On NT systems, it uses C<cmd.exe> in the system root, and on
 non-NT systems it uses C<command.com> in the system root.
 
-As of C<IPC::System::Simple> v1.25, the multiple-argument forms of
-each subroutine are properly quoted, so that arugments with spaces and
-the like work properly. Unfortunately, this breaks any attempt to
-invoke the shell itself. If you really need to execute C<cmd.exe>
-or C<command.com>, use the single-argument form.
+As of C<IPC::System::Simple> v1.25, the C<runx> and C<capturex>
+subroutines, as well as multiple-argument calls to the C<run> and
+C<capture> subroutines, have their arguments properly quoted, so that
+arugments with spaces and the like work properly. Unfortunately, this
+breaks any attempt to invoke the shell itself. If you really need to
+execute C<cmd.exe> or C<command.com>, use the single-argument form.
+For single-argument calls to C<run> and C<capture>, the argument must
+be properly shell-quoted in advance of the call.
 
 Versions of C<IPC::System::Simple> before v0.09 would not search
 the C<PATH> environment variable when the multi-argument form of

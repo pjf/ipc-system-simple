@@ -27,7 +27,7 @@ use constant CMD => join ' ', @{ &IPC::System::Simple::WINDOWS_SHELL };
 use constant CMD_WITH_SPACES        => 'dir with spaces\hello.exe';
 use constant CMD_WITH_SPACES_OUTPUT => "Hello World\n";
 
-plan tests => 33;
+plan tests => 37;
 
 my $perl_path = $Config{perlpath};
 $perl_path .= $Config{_exe} unless $perl_path =~ m/$Config{_exe}$/i;
@@ -129,23 +129,18 @@ my $output = capture(
 is($output,"12","RT #48319 - Check for STDOUT replumbing");
 
 # Check to ensure we can run commands that include spaces.
+$output = eval { capturex(CMD_WITH_SPACES, 'ignore'); };
+is($@, "", "command with spaces should not error (capturex multi)");
+is($output, CMD_WITH_SPACES_OUTPUT, "...and give correct output");
 
-SKIP: {
+$output = eval { capturex(CMD_WITH_SPACES); };
+is($@, "", "command with spaces should not error (capturex single)");
+is($output, CMD_WITH_SPACES_OUTPUT, "...and give correct output");
 
-    # CMD_WITH_SPACES is not currently distributed with IPC::System::Simple,
-    # effectively making this an author test for now. -- PJF, Dec 4, 2009
+$output = eval { capture(CMD_WITH_SPACES, 'ignore'); };
+is($@, "", "command with spaces should not error (capture multi)");
+is($output, CMD_WITH_SPACES_OUTPUT, "...and give correct output");
 
-    skip(CMD_WITH_SPACES." not implemented", 4);
-    # skip(CMD_WITH_SPACES." not available", 4) unless -x CMD_WITH_SPACES;
-
-    my $output = eval { capturex(CMD_WITH_SPACES); };
-
-    is($@, "", "command with spaces should not error (capturex)");
-    is($output, CMD_WITH_SPACES_OUTPUT, "...and give correct output");
-
-    $output = eval { capture(CMD_WITH_SPACES); };
-
-    is($@, "", "command with spaces should not error (capture)");
-    is($output, CMD_WITH_SPACES_OUTPUT, "...and give correct output");
-
-}
+$output = eval { capture('"' . CMD_WITH_SPACES . '"'); };
+is($@, "", "command with spaces should not error (capture quoted)");
+is($output, CMD_WITH_SPACES_OUTPUT, "...and give correct output");
