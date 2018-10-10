@@ -123,7 +123,7 @@ ok(1,"raw perl found in multi-part path");
 
 my $output = capture(
 	$^X, '-MIPC::System::Simple=capture',
-	q(-e"print 1; eval { capture(q(nosuchcmd)); }; print 2; exit 0;")
+	'-e', q(print 1; eval { capture(q(nosuchcmd)); }; print 2; exit 0;)
 );
 
 is($output,"12","RT #48319 - Check for STDOUT replumbing");
