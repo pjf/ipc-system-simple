@@ -30,10 +30,9 @@ BEGIN {
             use Win32::ShellQuote;
 
             # This uses the same rules as the core win32.c/get_shell() call.
-
             use constant WINDOWS_SHELL => eval { Win32::IsWinNT() }
-                                            ? [ qw(cmd.exe /x/d/c) ]
-                                            : [ qw(command.com /c) ];
+                ? [ File::Spec->catfile(Win32::GetFolderPath(Win32::CSIDL_SYSTEM), 'cmd.exe'), '/x/d/c' ]
+                : [ File::Spec->catfile(Win32::GetFolderPath(Win32::CSIDL_SYSTEM), 'command.com'), '/c' ];
 
             # These are used when invoking _win32_capture
             use constant NO_SHELL  => 0;
@@ -168,10 +167,7 @@ sub run {
 	}
 
     if (WINDOWS) {
-        my $exe = $command =~ m{^"([^"]+)"}x ? $1       :
-                  $command =~ m{(\S+)     }x ? $1       :
-                 croak sprintf(FAIL_CMD_BLANK, $command);
-        my $pid = _spawn_or_die($exe, $command);
+        my $pid = _spawn_or_die(&WINDOWS_SHELL->[0], join ' ', @{&WINDOWS_SHELL}, $command);
         $pid->Wait(INFINITE);	# Wait for process exit.
         $pid->GetExitCode($EXITVAL);
         return _check_exit($command,$EXITVAL,$valid_returns);
