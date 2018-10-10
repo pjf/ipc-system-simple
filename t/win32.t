@@ -21,7 +21,7 @@ use constant BIG_EXIT => 1000;
 use constant HUGE_EXIT => 100_000;
 
 # This command should allow us to exit with a specific value.
-use constant EXIT_CMD => [ @{ &IPC::System::Simple::WINDOWS_SHELL }, 'exit'];
+use constant CMD => join ' ', @{ &IPC::System::Simple::WINDOWS_SHELL };
 
 # These are used in the testing of commands in paths which contain spaces.
 use constant CMD_WITH_SPACES        => 'dir with spaces\hello.exe';
@@ -46,7 +46,7 @@ foreach my $big_exitval (SMALL_EXIT, BIG_EXIT, HUGE_EXIT) {
 
     my $exit;
     eval {
-        $exit = run([$big_exitval], @{&EXIT_CMD}, $big_exitval);
+        $exit = run([$big_exitval], CMD . qq{ "exit $big_exitval"});
     };
 
     is($@,"","Running with $big_exitval ok");
@@ -55,7 +55,7 @@ foreach my $big_exitval (SMALL_EXIT, BIG_EXIT, HUGE_EXIT) {
     my $capture;
     
     eval {
-	$capture = capture([$big_exitval], @{&EXIT_CMD}, $big_exitval);
+	$capture = capture([$big_exitval], CMD . qq{ exit $big_exitval"});
     };
 
     is($@,"","Capturing with $big_exitval ok");

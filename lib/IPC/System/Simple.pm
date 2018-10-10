@@ -167,7 +167,17 @@ sub run {
                 return systemx($valid_returns, $command, @args);
 	}
 
-        # Without arguments, we're calling system, and checking
+    if (WINDOWS) {
+        my $exe = $command =~ m{^"([^"]+)"}x ? $1       :
+                  $command =~ m{(\S+)     }x ? $1       :
+                 croak sprintf(FAIL_CMD_BLANK, $command);
+        my $pid = _spawn_or_die($exe, $command);
+        $pid->Wait(INFINITE);	# Wait for process exit.
+        $pid->GetExitCode($EXITVAL);
+        return _check_exit($command,$EXITVAL,$valid_returns);
+    }
+
+    # Without arguments, we're calling system, and checking
         # the results.
 
 	# We're throwing our own exception on command not found, so
@@ -222,7 +232,7 @@ sub capture {
 
         if (WINDOWS) {
             # USE_SHELL really means "You may use the shell if you need it."
-            return _win32_capture(USE_SHELL, $valid_returns, $command, @args);
+            return _win32_capture(USE_SHELL, $valid_returns, $command);
         }
 
 	our $EXITVAL = -1;
