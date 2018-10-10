@@ -45,6 +45,9 @@ chdir("t");
 foreach my $big_exitval (SMALL_EXIT, BIG_EXIT, HUGE_EXIT) {
 
     my $exit;
+    # XXX Ideally, we would find a way to test the multi-argument form, too,
+    # but cmd.exe no longer works with that form, because all args are quoted,
+    # and /x/d/c must not be.
     eval {
         $exit = run([$big_exitval], CMD . qq{ "exit $big_exitval"});
     };
