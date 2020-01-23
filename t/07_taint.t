@@ -54,3 +54,4 @@ ok(tainted($data), "Returns of multi-arg capture should be tainted");
 
 $data = eval { capture("$perl_path exiter.pl 0") };
 ok(tainted($data), "Returns of single-arg capture should be tainted");
+
