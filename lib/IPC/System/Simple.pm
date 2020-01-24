@@ -737,7 +737,7 @@ same behaviour:
 
     use IPC::System::Simple qw(system);
 
-    system("cat *.txt");  # system now suceeds or dies!
+    system("cat *.txt");  # system now succeeds or dies!
 
 C<system> and C<run> are aliases to each other.
 
@@ -1003,7 +1003,7 @@ tainted.
 C<IPC::System::Simple> takes an aggressive approach to error handling.
 Rather than allow commands to fail silently, exceptions are thrown
 when unexpected results are seen.  This allows for easy development
-using a try/catch style, and avoids the possibility of accidently
+using a try/catch style, and avoids the possibility of accidentally
 continuing after a failed command.
 
 =item Easy access to exit status
