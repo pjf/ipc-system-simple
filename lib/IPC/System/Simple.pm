@@ -64,7 +64,8 @@ use constant FAIL_BADEXIT   => q{"%s" unexpectedly returned exit value %d};
 
 use constant FAIL_UNDEF     => q{%s called with undefined command};
 
-use constant FAIL_POSIX     => q{IPC::System::Simple does not understand the POSIX error '%s'.  Please check http://search.cpan.org/perldoc?IPC::System::Simple to see if there is an updated version.  If not please report this as a bug to http://rt.cpan.org/Public/Bug/Report.html?Queue=IPC-System-Simple};
+
+use constant FAIL_POSIX     => q{IPC::System::Simple does not understand the POSIX error '%s'.  Please check https://metacpan.org/pod/IPC::System::Simple to see if there is an updated version.  If not please report this as a bug to https://github.com/pjf/ipc-system-simple/issues};
 
 # On Perl's older than 5.8.x we can't assume that there'll be a
 # $^{TAINT} for us to check, so we assume that our args may always
@@ -145,8 +146,10 @@ sub _native_wcoredump {
 
 # system simply calls run
 
+no warnings 'once';
 *system  = \&run;
 *systemx = \&runx;
+use warnings;
 
 # run is our way of running a process with system() semantics
 
