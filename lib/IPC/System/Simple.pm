@@ -989,10 +989,11 @@ to provide as much information as possible.  Rather than requiring
 the developer to inspect C<$?>, C<IPC::System::Simple> does the
 hard work for you.
 
-If an odd exit status is provided, you're informed of what it is.  If
-a signal kills your process, you are informed of both its name and
-number.  If tainted data or environment prevents your command from
-running, you are informed of exactly which datais 
+If an odd exit status is provided, you're informed of what it is.  If a
+signal kills your process, you are informed of both its name and number.
+If tainted data or environment prevents your command from running, you
+are informed of exactly which data or environmental variable is
+tainted.
 
 =item Exceptions on failure
 
