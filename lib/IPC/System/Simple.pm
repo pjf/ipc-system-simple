@@ -1036,7 +1036,7 @@ C<WIFSTOPPED> status is not checked, as perl never spawns processes
 with the C<WUNTRACED> option.
 
 Signals are not supported under Win32 systems, since they don't
-work at all like Unix signals.  Win32 singals cause commands to
+work at all like Unix signals.  Win32 signals cause commands to
 exit with a given exit value, which this modules I<does> capture.
 
 Only 8-bit values are returned when C<run()> or C<system()> 
