@@ -2,6 +2,23 @@ Revision history for Perl extension IPC::System::Simple.
 
 {{$NEXT}}
 
+1.27      2020-01-24 20:47 America/NewYork
+        * BUILD: Update FAIL_POSIX warning message
+          Per:  https://github.com/pjf/ipc-system-simple/pull/28.  Thanks to scop.
+
+        * TEST: t/07_taint.t: Use executable name as source of taintedness
+          Addresses https://github.com/pjf/ipc-system-simple/issues/21
+          Thanks to Petr Písař.
+
+        * OTHER: Typographic corrections:
+          rt.cpan.org 60211; leonerd++
+          rt.cpan.org 86403; dsteinbrunner++
+
+          Add Travis configuration.
+
+1.26      2020-01-24 03:43:20 GMT
+          TRIAL release only
+
 1.25      2013-10-20 13:38:32 Pacific/Auckland
 
         * BUILD: No longer ship unrequired file Debian_CPANTS.txt.
