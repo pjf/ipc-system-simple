@@ -36,6 +36,13 @@ use_ok("IPC::System::Simple","run");
 
 chdir("t");
 
+#Open a Perl script as backup input. If Perl is called with no arguments, it
+#waits for input on STDIN.
+#This ensures there's data on STDIN so it doesn't hang.
+open my $input, '<', 'fail_test.pl' or die "Couldn't open perl script - $!";
+my $fileno = fileno($input);
+open STDIN, "<&$fileno" or die "Couldn't dup - $!";
+
 my $rlimit_success = setrlimit(RLIMIT_CORE, RLIM_INFINITY, RLIM_INFINITY);
 
 SKIP: {
@@ -43,6 +50,7 @@ SKIP: {
 
 	eval {
 		run([1],$perl_path, 'signaler.pl', SIGABRT);
+		seek($input, 0, 0); #Rewind STDIN. Necessary after every potential Perl call
 	};
 
 	like($@, qr/died to signal/, "Signal caught,   \$? = $?");
