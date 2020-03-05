@@ -22,7 +22,7 @@ chdir("t");     # Ignore return, since we may already be in t/
 #This ensures there's data on STDIN so it doesn't hang.
 open my $input, '<', 'fail_test.pl' or die "Couldn't open perl script - $!";
 my $fileno = fileno($input);
-open STDIN, "<&$fileno" or die "Couldn't dup - $!";
+open STDIN, "<&", $fileno or die "Couldn't dup - $!";
 
 my $taint = $0 . "foo";	# ."foo" to avoid zero length
 ok(tainted($taint),"Sanity - executable name is tainted");
