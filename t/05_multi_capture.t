@@ -19,12 +19,10 @@ if ($^O ne 'VMS') {
 use_ok("IPC::System::Simple","capture");
 chdir("t");
 
-#Open a Perl script as backup input. If Perl is called with no arguments, it
-#waits for input on STDIN.
-#This ensures there's data on STDIN so it doesn't hang.
-open my $input, '<', 'fail_test.pl' or die "Couldn't open perl script - $!";
-my $fileno = fileno($input);
-open STDIN, "<&", $fileno or die "Couldn't dup - $!";
+#Close STDIN (and reopen to prevent warnings)
+#If Perl is called with no arguments, it waits for input on STDIN.
+close STDIN;
+open STDIN, '<', '/dev/null';
 
 # The tests below for $/ are left in, even though IPC::System::Simple
 # never touches $/
@@ -32,7 +30,6 @@ open STDIN, "<&", $fileno or die "Couldn't dup - $!";
 # Scalar capture
 
 my $output = capture($perl_path,"output.pl",0);
-seek($input, 0, 0); #Rewind STDIN. Necessary after every potential Perl call
 ok(1);
 
 is($output,"Hello\nGoodbye\n","Scalar capture");
@@ -41,7 +38,6 @@ is($/,"\n",'$/ intact');
 # List capture
 
 my @output = capture($perl_path,"output.pl",0);
-seek($input, 0, 0);
 ok(1);
 
 is_deeply(\@output,["Hello\n", "Goodbye\n"],"List capture");
@@ -52,7 +48,6 @@ is($/,"\n",'$/ intact');
 {
 	local $/ = "e";
 	my @odd_output = capture($perl_path,"output.pl",0);
-	seek($input, 0, 0);
 	ok(1);
 
 	is_deeply(\@odd_output,["He","llo\nGoodbye","\n"], 'Odd $/ capture');
@@ -70,7 +65,6 @@ is($no_output,undef, "No output from failed command");
 # Running Perl -v
 
 my $perl_output = capture($perl_path,"-v");
-seek($input, 0, 0);
 like($perl_output, qr{Larry Wall}, "perl -v contains Larry");
 
 SKIP: {

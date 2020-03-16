@@ -40,12 +40,10 @@ ok($raw_perl, "Have perl executables with and w/o extensions.");
 
 chdir("t");
 
-#Open a Perl script as backup input. If Perl is called with no arguments, it
-#waits for input on STDIN.
-#This ensures there's data on STDIN so it doesn't hang.
-open my $input, '<', 'fail_test.pl' or die "Couldn't open perl script - $!";
-my $fileno = fileno($input);
-open STDIN, "<&", $fileno or die "Couldn't dup - $!";
+#Close STDIN (and reopen to prevent warnings)
+#If Perl is called with no arguments, it waits for input on STDIN.
+close STDIN;
+open STDIN, '<', '/dev/null';
 
 # Check for 16 and 32 bit returns.
 
@@ -83,55 +81,44 @@ foreach my $big_exitval (SMALL_EXIT, BIG_EXIT, HUGE_EXIT) {
 $ENV{PATH} = "";
 
 eval { run($perl_exe,"-e1"); };
-seek($input, 0, 0); #Rewind STDIN. Necessary after every potential Perl call
 like($@,qr/failed to start/,"No calling perl when not in path");
 
 eval { capture($perl_exe,"-e1"); };
-seek($input, 0, 0);
 like($@, qr/failed to start/, "Capture can't find perl when not in path");
 
 eval { run($raw_perl,"-e1"); };
-seek($input, 0, 0);
 like($@, qr/failed to start/, "Can't find raw perl when not in path, either");
 
 $ENV{PATH} = $perl_dir;
 
 run($perl_exe,"-e1");
-seek($input, 0, 0);
 ok(1,"run found perl in path");
 
 run($raw_perl,"-e1");
-seek($input, 0, 0);
 ok(1,"run found raw perl in path");
 
 my $capture = capture($perl_exe,"-v");
-seek($input, 0, 0);
 ok(1,"capture found perl in path");
 like($capture, qr/Larry Wall/, "Capture text successful");
 
 $capture = capture($raw_perl,"-v");
-seek($input, 0, 0);
 ok(1,"capture found raw perl in path");
 like($capture, qr/Larry Wall/, "Capture text successful");
 
 $capture = capture("$perl_exe -v");
-seek($input, 0, 0);
 ok(1,"capture found single-arg perl in path");
 like($capture, qr/Larry Wall/, "Single-arg Capture text successful");
 
 $capture = capture("$raw_perl -v");
-seek($input, 0, 0);
 ok(1,"capture found single-arg raw perl in path");
 like($capture, qr/Larry Wall/, "Single-arg Capture text successful");
 
 $ENV{PATH} = "$ENV{SystemRoot};$perl_dir;$ENV{SystemRoot}\\System32";
 
 run($perl_exe,"-e1");
-seek($input, 0, 0);
 ok(1,"perl found in multi-part path");
 
 run($raw_perl,"-e1");
-seek($input, 0, 0);
 ok(1,"raw perl found in multi-part path");
 
 # RT #48319 - capture/capturex could break STDOUT when running
