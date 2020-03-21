@@ -38,3 +38,6 @@ MYMETA.*$
 ^README.md
 ^.README.pod
 \.appveyor.yml
+\.perlcriticrc
+t/dir with spaces/hello.c
+t/dir with spaces/hello.exe
