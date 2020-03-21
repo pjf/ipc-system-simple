@@ -1,10 +1,11 @@
 Changes
-LICENSE
-MANIFEST
-Makefile.PL
-README
 examples/rsync-backup.pl
 lib/IPC/System/Simple.pm
+LICENSE
+Makefile.PL
+MANIFEST			This list of files
+MANIFEST.SKIP
+README
 t/01_load.t
 t/02_exit.t
 t/03_signal.t
@@ -20,12 +21,12 @@ t/12_systemx.t
 t/13_exports.t
 t/14_uninitialised.t
 t/args.t
-xt/author-critic.t
-xt/author-pod-coverage.t
-xt/author-pod-syntax.t
 t/exiter.pl
 t/internal.t
 t/not_an_exe.txt
 t/output.pl
 t/signaler.pl
 t/win32.t
+xt/author-critic.t
+xt/author-pod-coverage.t
+xt/author-pod-syntax.t
