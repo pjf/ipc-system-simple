@@ -146,7 +146,7 @@ sub _native_wcoredump {
 
 # system simply calls run
 
-no warnings 'once';
+no warnings 'once'; ## no critic
 *system  = \&run;
 *systemx = \&runx;
 use warnings;
