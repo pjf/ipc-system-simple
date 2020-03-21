@@ -1,6 +1,8 @@
 Revision history for Perl extension IPC::System::Simple.
 
-{{$NEXT}}
+1.28_001    2020-03-21 16:42 America/NewYork
+          TRIAL RELEASE only
+          Attempting to resolve numerous Win32 issues
 
 1.26      2020-01-24 20:47 America/NewYork
         * BUILD: Update FAIL_POSIX warning message
