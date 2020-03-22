@@ -1,6 +1,23 @@
 Revision history for Perl extension IPC::System::Simple.
 
-1.28_001    2020-03-21 16:42 America/NewYork
+1.28    2020-03-21 21:39 America/New York
+
+        * SUBSTANCE:  Improved handling of shell commands on Windows,
+          mostly per suggestions by David Wheeler.  This should get us
+          closer to resolving Win32-related issues.  (There should be no
+          change of functionality on Unix-like platforms.)
+
+        * TESTING:  Add t/args.t per David Wheeler.  Modify t/win32.t per
+          @dylanstreb.
+
+        * META:  Added Travis and AppVeyor configuration files.
+          Eliminated use of Dist::Zilla for build.  Using older, but
+          more reliable and better understood (by maintainer)
+          ExtUtils::MakeMaker-based configuration.  Add LICENSE, README,
+          Makefile.PL, MANIFEST and MANIFEST.SKIP; remove dist.ini.  Move author
+          testing to xt/directory.
+
+1.28_001  2020-03-21 16:42 America/NewYork
           TRIAL RELEASE only
           Attempting to resolve numerous Win32 issues
 
