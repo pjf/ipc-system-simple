@@ -531,13 +531,13 @@ sub _process_child_error {
 
 	my $coredump = WCOREDUMP($child_error);
 
-        # There's a bug in perl 5.10.0 where if the system
+        # There's a bug in perl 5.8.9 and 5.10.0 where if the system
         # does not provide a native WCOREDUMP, then $? will
         # never contain coredump information.  This code
         # checks to see if we have the bug, and works around
         # it if needed.
 
-        if ($] >= 5.010 and not $NATIVE_WCOREDUMP) {
+        if ($] >= 5.008009 and not $NATIVE_WCOREDUMP) {
             $coredump ||= WCOREDUMP( ${^CHILD_ERROR_NATIVE} );
         }
 
