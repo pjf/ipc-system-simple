@@ -1,5 +1,10 @@
 Revision history for Perl extension IPC::System::Simple.
 
+1.29    2020-03-22 08:22 America/New York
+
+        * SUBSTANCE:  Better workaround for bug in perl-5.8.9
+          (GHI 23); contributed by Slaven Rezić.
+
 1.28    2020-03-21 21:39 America/New York
 
         * SUBSTANCE:  Improved handling of shell commands on Windows,
