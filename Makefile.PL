@@ -82,8 +82,15 @@ unless ( eval { ExtUtils::MakeMaker->VERSION(6.63_03) } ) {
 delete $WriteMakefileArgs{CONFIGURE_REQUIRES}
   unless eval { ExtUtils::MakeMaker->VERSION(6.52) };
 
+my %win32_modules = (
+	'Win32::ShellQuote' => 0,
+	'Win32::Process'    => 0,
+);
 if ( $^O eq 'MSWin32' ) {
-	$WriteMakefileArgs{PREREQ_PM}{'Win32::ShellQuote'} = $FallbackPrereqs{'Win32::ShellQuote'} = '0';
+    for my $k (keys %win32_modules) {
+        $WriteMakefileArgs{PREREQ_PM}{$k} = $win32_modules{$k};
+        $FallbackPrereqs{$k}              = $win32_modules{$k};
+    }
 }
 
 WriteMakefile(%WriteMakefileArgs);
