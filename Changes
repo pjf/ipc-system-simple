@@ -1,5 +1,10 @@
 Revision history for Perl extension IPC::System::Simple.
 
+1.30    2020-03-23 21:16 America/New York
+
+        * SUBSTANCE:  On MSWin32, make Win32::Process a prerequisite (needed
+          for non-Strawberry Perl builds).  As recommended by A Sinan Unur.
+
 1.29    2020-03-22 08:22 America/New York
 
         * SUBSTANCE:  Better workaround for bug in perl-5.8.9

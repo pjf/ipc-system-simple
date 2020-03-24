@@ -87,7 +87,7 @@ our @EXPORT_OK = qw(
     $EXITVAL EXIT_ANY
 );
 
-our $VERSION = '1.29';
+our $VERSION = '1.30';
 $VERSION =~ tr/_//d;
 
 our $EXITVAL = -1;
