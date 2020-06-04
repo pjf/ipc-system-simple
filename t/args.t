@@ -71,17 +71,17 @@ for my $spec (
 }
 
 # Make sure redirection works, too.
-my $exit = eval { run "$perl output.pl > $tmp" };
+my $exit = eval { run "\"$perl\" output.pl > $tmp" };
 is $@, "", "Should have no error from run with redirection";
 is $exit, 0, "Should have exit 0 from run with redirection";
 is $slurp->(), "Hello\nGoodbye\n", "Should have redirected text run";
 
-$exit = eval { system "$perl output.pl > $tmp" };
+$exit = eval { system "\"$perl\" output.pl > $tmp" };
 is $@, "", "Should have no error from systemx with redirection";
 is $exit, 0, "Should have exit 0 from systemx with redirection";
 is $slurp->(), "Hello\nGoodbye\n", "Should have redirected text systemx";
 
 # And single-string capture.
-my $output = eval { capture "$perl output.pl" };
+my $output = eval { capture "\"$perl\" output.pl" };
 is $@, "", "Should have no error from single-string capture";
 is $output, "Hello\nGoodbye\n", "Should have output from capture";

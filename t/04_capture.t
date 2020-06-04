@@ -15,7 +15,7 @@ if ($^O ne 'VMS') {
 
 # Win32 systems don't support multi-arg pipes.  Our
 # simple captures will begin with single-arg tests.
-my $output_exe = "$perl_path output.pl";
+my $output_exe = "\"$perl_path\" output.pl";
 
 use_ok("IPC::System::Simple","capture");
 chdir("t");
