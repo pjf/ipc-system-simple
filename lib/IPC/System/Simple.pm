@@ -901,7 +901,7 @@ non-NT systems it uses C<command.com> in the system root.
 As of C<IPC::System::Simple> v1.25, the C<runx> and C<capturex>
 subroutines, as well as multiple-argument calls to the C<run> and
 C<capture> subroutines, have their arguments properly quoted, so that
-arugments with spaces and the like work properly. Unfortunately, this
+arguments with spaces and the like work properly. Unfortunately, this
 breaks any attempt to invoke the shell itself. If you really need to
 execute C<cmd.exe> or C<command.com>, use the single-argument form.
 For single-argument calls to C<run> and C<capture>, the argument must
@@ -1050,7 +1050,7 @@ invokes the shell.
 =head1 BUGS
 
 When C<system> is exported, the exotic form C<system { $cmd } @args>
-is not supported.  Attemping to use the exotic form is a syntax
+is not supported.  Attempting to use the exotic form is a syntax
 error.  This affects the calling package I<only>.  Use C<CORE::system>
 if you need it, or consider using the L<autodie> module to replace
 C<system> with lexical scope.
