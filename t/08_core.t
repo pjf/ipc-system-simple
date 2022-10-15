@@ -39,14 +39,15 @@ chdir("t");
 my $rlimit_success = setrlimit(RLIMIT_CORE, RLIM_INFINITY, RLIM_INFINITY);
 
 SKIP: {
-	skip "setrlimit failed", 2 if not $rlimit_success;
+    skip "setrlimit failed", 2 if not $rlimit_success;
 
-	eval {
-		run([1],$perl_path, 'signaler.pl', SIGABRT);
-	};
+    eval {
+    	run([1],$perl_path, 'signaler.pl', SIGABRT);
+    };
 
-	like($@, qr/died to signal/, "Signal caught,   \$? = $?");
-	like($@, qr/dumped core/,    "Coredump caught, \$? = $?");
+    like($@, qr/died to signal/, "Signal caught,   \$? = $?");
+    like($@, qr/dumped core/,    "Coredump caught, \$? = $?");
 
-        unlink('core');     # Clean up our core file, if it exists.
+    unlink('core');     # Clean up our core file, if it exists.
+    unlink('perl.core');     # Clean up our core file, if it exists.
 }
