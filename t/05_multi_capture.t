@@ -19,6 +19,11 @@ if ($^O ne 'VMS') {
 use_ok("IPC::System::Simple","capture");
 chdir("t");
 
+#Close STDIN (and reopen to prevent warnings)
+#If Perl is called with no arguments, it waits for input on STDIN.
+close STDIN;
+open STDIN, '<', '/dev/null';
+
 # The tests below for $/ are left in, even though IPC::System::Simple
 # never touches $/
 

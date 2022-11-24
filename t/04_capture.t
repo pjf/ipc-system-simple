@@ -20,6 +20,11 @@ my $output_exe = "$perl_path output.pl";
 use_ok("IPC::System::Simple","capture");
 chdir("t");
 
+#Close STDIN (and reopen to prevent warnings)
+#If Perl is called with no arguments, it waits for input on STDIN.
+close STDIN;
+open STDIN, '<', '/dev/null';
+
 # Scalar capture
 
 my $output = capture($output_exe);

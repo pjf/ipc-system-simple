@@ -40,6 +40,11 @@ ok($raw_perl, "Have perl executables with and w/o extensions.");
 
 chdir("t");
 
+#Close STDIN (and reopen to prevent warnings)
+#If Perl is called with no arguments, it waits for input on STDIN.
+close STDIN;
+open STDIN, '<', '/dev/null';
+
 # Check for 16 and 32 bit returns.
 
 foreach my $big_exitval (SMALL_EXIT, BIG_EXIT, HUGE_EXIT) {

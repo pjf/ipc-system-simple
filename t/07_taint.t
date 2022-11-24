@@ -17,6 +17,11 @@ use_ok("IPC::System::Simple","run","capture");
 
 chdir("t");     # Ignore return, since we may already be in t/
 
+#Close STDIN (and reopen to prevent warnings)
+#If Perl is called with no arguments, it waits for input on STDIN.
+close STDIN;
+open STDIN, '<', '/dev/null';
+
 my $taint = $0 . "foo";	# ."foo" to avoid zero length
 ok(tainted($taint),"Sanity - executable name is tainted");
 

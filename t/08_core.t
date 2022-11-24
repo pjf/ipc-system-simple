@@ -36,6 +36,11 @@ use_ok("IPC::System::Simple","run");
 
 chdir("t");
 
+#Close STDIN (and reopen to prevent warnings)
+#If Perl is called with no arguments, it waits for input on STDIN.
+close STDIN;
+open STDIN, '<', '/dev/null';
+
 my $rlimit_success = setrlimit(RLIMIT_CORE, RLIM_INFINITY, RLIM_INFINITY);
 
 SKIP: {

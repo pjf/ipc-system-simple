@@ -11,6 +11,12 @@ if ($^O ne 'VMS') {
         unless $perl_path =~ m/$Config{_exe}$/i;
 }
 
+chdir("t");	# Ignore return, since we may already be in t/
+#Close STDIN (and reopen to prevent warnings)
+#If Perl is called with no arguments, it waits for input on STDIN.
+close STDIN;
+open STDIN, '<', '/dev/null';
+
 eval { run( "$perl_path -e1" ) };
 is($@, "", 'Run works with single arg');
 

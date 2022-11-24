@@ -15,6 +15,11 @@ if ($^O ne 'VMS') {
 use IPC::System::Simple qw(run EXIT_ANY);
 chdir("t");	# Ignore return, since we may already be in t/
 
+#Close STDIN (and reopen to prevent warnings)
+#If Perl is called with no arguments, it waits for input on STDIN.
+close STDIN;
+open STDIN, '<', '/dev/null';
+
 run($perl_path,"exiter.pl",0);
 ok(1,"Multi-arg implicit zero allowed");
 

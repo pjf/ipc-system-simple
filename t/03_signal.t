@@ -24,6 +24,11 @@ use_ok("IPC::System::Simple","run");
 
 chdir("t");
 
+#Close STDIN (and reopen to prevent warnings)
+#If Perl is called with no arguments, it waits for input on STDIN.
+close STDIN;
+open STDIN, '<', '/dev/null';
+
 run([1],$perl_path,"signaler.pl",0);
 ok(1);
 

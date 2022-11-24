@@ -14,6 +14,11 @@ if ($^O ne 'VMS') {
 
 chdir("t");     # Ignore return, since we may already be in t/
 
+#Close STDIN (and reopen to prevent warnings)
+#If Perl is called with no arguments, it waits for input on STDIN.
+close STDIN;
+open STDIN, '<', '/dev/null';
+
 my $exit_test = "$perl_path exiter.pl 0";
 
 eval {
