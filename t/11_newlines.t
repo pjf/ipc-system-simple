@@ -11,20 +11,20 @@ if ($^O ne 'VMS') {
         unless $perl_path =~ m/$Config{_exe}$/i;
 }
 
-eval { run( "$perl_path -e1" ) };
+eval { run( "\"$perl_path\" -e1" ) };
 is($@, "", 'Run works with single arg');
 
-eval { run( "$perl_path -e1\n" ) };
+eval { run( "\"$perl_path\" -e1\n" ) };
 is($@, "", 'Run works with \\n');
 
-eval { run( "$perl_path -e1\r\n") };
+eval { run( "\"$perl_path\" -e1\r\n") };
 is($@, "", 'Run works with \r\n');
 
-eval { capture( "$perl_path -e1" ) };
+eval { capture( "\"$perl_path\" -e1" ) };
 is($@, "", 'Run works with single arg');
 
-eval { capture( "$perl_path -e1\n" ) };
+eval { capture( "\"$perl_path\" -e1\n" ) };
 is($@, "", 'Run works with \\n');
 
-eval { capture( "$perl_path -e1\r\n") };
+eval { capture( "\"$perl_path\" -e1\r\n") };
 is($@, "", 'Run works with \r\n');

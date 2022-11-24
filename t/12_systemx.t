@@ -14,7 +14,7 @@ if ($^O ne 'VMS') {
 
 chdir("t");     # Ignore return, since we may already be in t/
 
-my $exit_test = "$perl_path exiter.pl 0";
+my $exit_test = "\"$perl_path\" exiter.pl 0";
 
 eval {
     system($exit_test);
@@ -32,7 +32,7 @@ eval {
 };
 is($@,"", "multi-arg systemx works");
 
-my $output_test = "$perl_path output.pl";
+my $output_test = "\"$perl_path\" output.pl";
 
 my $output;
 

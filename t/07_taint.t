@@ -1,8 +1,14 @@
 #!/usr/bin/perl -wT
 use strict;
-use Test::More tests => 13;
+use Test::More;
 use Scalar::Util qw(tainted);
 use Config;
+
+if (exists $INC{"Portable.pm"}) {
+  plan skip_all => 'Cannot test tainted perlpath under Portable perl';
+} else {
+  plan tests => 13;
+}
 
 my $perl_path = $Config{perlpath};
 

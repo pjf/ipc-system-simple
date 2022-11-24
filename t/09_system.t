@@ -18,7 +18,7 @@ chdir("t");	# Ignore return, since we may already be in t/
 system($perl_path,"exiter.pl",0);
 ok(1,"Multi-arg system");
 
-system("$perl_path exiter.pl 0");
+system("\"$perl_path\" exiter.pl 0");
 ok(1,"Single-arg system success");
 
 foreach (1..5,250..255) {
@@ -36,7 +36,7 @@ foreach (1..5,250..255) {
 foreach (1..5,250..255) {
 
 	eval {
-		system("$perl_path exiter.pl $_");
+		system("\"$perl_path\" exiter.pl $_");
 	};
 
 	like($@, qr/unexpectedly returned exit value $_/, "Single-arg system fail" );
