@@ -12,6 +12,7 @@ use Scalar::Util qw(tainted);
 use Config;
 use constant WINDOWS => ($^O eq 'MSWin32');
 use constant VMS     => ($^O eq 'VMS');
+use B;
 
 BEGIN {
 
@@ -405,6 +406,12 @@ sub capturex {
 		# the parent.
 
 		print {$write_fh} int($!);
+
+		# Exiting will call all END{} blocks which typically messes up code
+		# which created them. Delete all such blocks before exiting.
+
+		@{; eval { B::end_av->object_2svref } || [] } = ();
+
 		exit(-1);
 	}
 

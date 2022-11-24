@@ -3,13 +3,18 @@ use strict;
 
 use IPC::System::Simple qw(system systemx capture capturex);
 use Config;
-use Test::More tests => 7;
+use Test::More tests => 8;
 
 my $perl_path = $Config{perlpath};
 
 if ($^O ne 'VMS') {
         $perl_path .= $Config{_exe}
                 unless $perl_path =~ m/$Config{_exe}$/i;
+}
+
+my $pid = $$;
+END {
+    is($$, $pid, "END Block Called in main process");
 }
 
 chdir("t");     # Ignore return, since we may already be in t/
