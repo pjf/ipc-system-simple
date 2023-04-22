@@ -1,24 +1,30 @@
 #!/usr/bin/perl -wT
 use strict;
 use Test::More tests => 5;
+use Config;
 
 use_ok("IPC::System::Simple","run");
 
 # A formatting bug caused ISS to mention its name twice in
 # diagnostics.  These tests make sure it's fixed.
 
+SKIP: {
+    if (exists($Config{taint_support}) && not $Config{taint_support}) {
+        skip("your perl was built without taint support", 2);
+    }
 
-eval {
-	run($^X);
-};
+    eval {
+        run($^X);
+    };
 
-like($@,qr{^IPC::System::Simple::run called with tainted argument},"Taint pkg only once");
+    like($@,qr{^IPC::System::Simple::run called with tainted argument},"Taint pkg only once");
 
-eval {
-	run(1);
-};
+    eval {
+        run(1);
+    };
 
-like($@,qr{^IPC::System::Simple::run called with tainted environment},"Taint env only once");
+    like($@,qr{^IPC::System::Simple::run called with tainted environment},"Taint env only once");
+}
 
 # Delete everything in %ENV so we can't get taint errors.
 
