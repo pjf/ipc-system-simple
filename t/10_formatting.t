@@ -1,6 +1,14 @@
 #!/usr/bin/perl -wT
 use strict;
-use Test::More tests => 5;
+use Test::More;
+use Config;
+
+if( $Config{taint_disabled} ) {
+    plan skip_all => 'Test not relevant on a perl built without taint support';
+} else {
+    plan tests => 5;
+}
+
 
 use_ok("IPC::System::Simple","run");
 

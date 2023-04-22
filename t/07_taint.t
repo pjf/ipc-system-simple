@@ -1,8 +1,14 @@
 #!/usr/bin/perl -wT
 use strict;
-use Test::More tests => 13;
+use Test::More;
 use Scalar::Util qw(tainted);
 use Config;
+
+if( $Config{taint_disabled} ) {
+    plan skip_all => 'Test not relevant on a perl built without taint support';
+} else {
+    plan tests => 13;
+}
 
 my $perl_path = $Config{perlpath};
 
