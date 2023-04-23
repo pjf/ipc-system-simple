@@ -30,3 +30,5 @@ t/win32.t
 xt/author-critic.t
 xt/author-pod-coverage.t
 xt/author-pod-syntax.t
+t/07_taint.pl
+t/10_formatting.pl
